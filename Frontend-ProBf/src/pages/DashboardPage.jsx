@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Container, Grid, Card, CardContent, Typography, ToggleButtonGroup, ToggleButton, Stack, CircularProgress, Button } from '@mui/material'
+import { Container, Grid, Card, CardContent, Typography, ToggleButtonGroup, ToggleButton, Stack, CircularProgress, Button, Alert } from '@mui/material'
 import BoltIcon from '@mui/icons-material/Bolt'
 import api from '../api/client'
 import { useAuth } from '../context/AuthContext'
@@ -51,6 +51,10 @@ export default function DashboardPage() {
       </Container>
     )
   }
+
+  const joursAvantExpiration = stats.abonnement_actif
+    ? Math.ceil((new Date(stats.abonnement_actif.date_fin) - new Date()) / (1000 * 60 * 60 * 24))
+    : null
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
@@ -110,6 +114,12 @@ export default function DashboardPage() {
       </Grid>
 
       <DashboardTrendChart />
+
+      {estPro && joursAvantExpiration !== null && joursAvantExpiration <= 7 && (
+        <Alert severity="warning" sx={{ mt: 3 }}>
+          Ton abonnement expire {joursAvantExpiration <= 0 ? "aujourd'hui" : `dans ${joursAvantExpiration} jour${joursAvantExpiration > 1 ? 's' : ''}`}, pense à le renouveler.
+        </Alert>
+      )}
 
       {estPro && (
         <Stack direction="row" spacing={2} sx={{ mt: 3, alignItems: 'center', flexWrap: 'wrap' }}>

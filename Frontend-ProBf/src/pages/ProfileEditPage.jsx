@@ -25,6 +25,7 @@ import api from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import PhotoUpload from '../components/PhotoUpload'
 import AjouterMetierDialog from '../components/AjouterMetierDialog'
+import AjouterQuartierDialog from '../components/AjouterQuartierDialog'
 
 export default function ProfileEditPage() {
   const { user } = useAuth()
@@ -39,6 +40,7 @@ export default function ProfileEditPage() {
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState(null)
   const [dialogMetierOuvert, setDialogMetierOuvert] = useState(false)
+  const [dialogQuartierOuvert, setDialogQuartierOuvert] = useState(false)
 
   const [nouveauPortfolio, setNouveauPortfolio] = useState({ photo_avant: '', photo_apres: '', description: '' })
 
@@ -63,6 +65,12 @@ export default function ProfileEditPage() {
   const ajouterMetier = async (nom) => {
     const { data } = await api.post('/metiers', { nom })
     setMetiers((prev) => (prev.some((m) => m.id === data.id) ? prev : [...prev, data].sort((a, b) => a.nom.localeCompare(b.nom))))
+    return data
+  }
+
+  const ajouterQuartier = async ({ ville, nom }) => {
+    const { data } = await api.post('/quartiers', { ville, nom })
+    setQuartiers((prev) => (prev.some((q) => q.id === data.id) ? prev : [...prev, data]))
     return data
   }
 
@@ -153,7 +161,14 @@ export default function ProfileEditPage() {
             <Select
               multiple
               value={selectedQuartiers}
-              onChange={(e) => setSelectedQuartiers(e.target.value)}
+              onChange={(e) => {
+                const valeurs = e.target.value
+                if (valeurs.includes('__autre__')) {
+                  setDialogQuartierOuvert(true)
+                  return
+                }
+                setSelectedQuartiers(valeurs)
+              }}
               input={<OutlinedInput label="Quartiers d'intervention" />}
               renderValue={(selected) => (
                 <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
@@ -168,6 +183,9 @@ export default function ProfileEditPage() {
                   {q.nom} — {q.ville?.nom}
                 </MenuItem>
               ))}
+              <MenuItem value="__autre__" sx={{ fontWeight: 600, color: 'primary.main' }}>
+                + Autre (préciser)
+              </MenuItem>
             </Select>
           </FormControl>
 
@@ -232,6 +250,15 @@ export default function ProfileEditPage() {
         onAjoute={async (nom) => {
           const metier = await ajouterMetier(nom)
           setSelectedMetiers((prev) => [...prev, metier.id])
+        }}
+      />
+
+      <AjouterQuartierDialog
+        open={dialogQuartierOuvert}
+        onClose={() => setDialogQuartierOuvert(false)}
+        onAjoute={async ({ ville, nom }) => {
+          const quartier = await ajouterQuartier({ ville, nom })
+          setSelectedQuartiers((prev) => [...prev, quartier.id])
         }}
       />
     </Container>

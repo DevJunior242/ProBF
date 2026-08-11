@@ -142,6 +142,10 @@ export default function FournisseurDashboardPage() {
     )
   }
 
+  const joursAvantExpiration = stats.abonnement_actif
+    ? Math.ceil((new Date(stats.abonnement_actif.date_fin) - new Date()) / (1000 * 60 * 60 * 24))
+    : null
+
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Typography variant="h4" fontWeight={700} gutterBottom>
@@ -159,6 +163,12 @@ export default function FournisseurDashboardPage() {
           <StatCard label="Leads ce mois" value={stats.leads_ce_mois} />
         </Grid>
       </Grid>
+
+      {joursAvantExpiration !== null && joursAvantExpiration <= 7 && (
+        <Alert severity="warning" sx={{ mb: 3 }}>
+          Ton abonnement expire {joursAvantExpiration <= 0 ? "aujourd'hui" : `dans ${joursAvantExpiration} jour${joursAvantExpiration > 1 ? 's' : ''}`}, pense à le renouveler.
+        </Alert>
+      )}
 
       <Stack direction="row" spacing={2} sx={{ mb: 4, alignItems: 'center', flexWrap: 'wrap' }}>
         <Typography color="text.secondary">

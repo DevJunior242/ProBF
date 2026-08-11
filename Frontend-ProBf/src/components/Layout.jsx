@@ -44,6 +44,7 @@ export default function Layout() {
     { to: '/fournisseurs', label: 'Fournisseurs' },
     { to: '/demandes/nouvelle', label: 'Radar de demande' },
     ...(user ? [{ to: espaceLink, label: 'Mon espace' }] : []),
+    ...(hasRole('admin') ? [{ to: '/admin', label: 'Administration' }] : []),
   ]
 
   return (

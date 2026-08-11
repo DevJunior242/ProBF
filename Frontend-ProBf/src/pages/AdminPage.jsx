@@ -7,6 +7,7 @@ import AdminTarifs from '../components/admin/AdminTarifs'
 import AdminAbonnements from '../components/admin/AdminAbonnements'
 import AdminUtilisateurs from '../components/admin/AdminUtilisateurs'
 import AdminRetraits from '../components/admin/AdminRetraits'
+import AdminQuartiers from '../components/admin/AdminQuartiers'
 
 export default function AdminPage() {
   const [onglet, setOnglet] = useState(0)
@@ -30,6 +31,7 @@ export default function AdminPage() {
         <Tab label="Tarifs" />
         <Tab label="Abonnements" />
         <Tab label="Retraits ambassadeurs" />
+        <Tab label="Quartiers" />
         <Tab label="Utilisateurs" />
       </Tabs>
 
@@ -52,7 +54,10 @@ export default function AdminPage() {
         {onglet === 5 && <AdminRetraits />}
       </Box>
       <Box role="tabpanel" hidden={onglet !== 6}>
-        {onglet === 6 && <AdminUtilisateurs />}
+        {onglet === 6 && <AdminQuartiers />}
+      </Box>
+      <Box role="tabpanel" hidden={onglet !== 7}>
+        {onglet === 7 && <AdminUtilisateurs />}
       </Box>
     </Container>
   )

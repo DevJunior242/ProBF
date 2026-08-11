@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { Container, TextField, Button, Typography, Stack, Alert, Paper } from '@mui/material'
+import { useNavigate, Link as RouterLink } from 'react-router-dom'
+import { Container, TextField, Button, Typography, Stack, Alert, Paper, Box, Link } from '@mui/material'
 import { useAuth } from '../context/AuthContext'
 import PasswordField from '../components/PasswordField'
+import Logo from '../components/Logo'
 
 export default function LoginPage() {
   const { login } = useAuth()
@@ -27,37 +28,79 @@ export default function LoginPage() {
   }
 
   return (
-    <Container maxWidth="xs" sx={{ py: 6 }}>
-      <Paper variant="outlined" sx={{ p: 4 }}>
-        <Typography variant="h5" fontWeight={700} gutterBottom>
-          Connexion
-        </Typography>
+    <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'center', py: { xs: 5, sm: 8 }, px: 2 }}>
+      <Box
+        sx={{
+          position: 'absolute',
+          inset: 0,
+          overflow: 'hidden',
+          zIndex: -1,
+          pointerEvents: 'none',
+        }}
+      >
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '-15%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 480,
+            height: 480,
+            borderRadius: '50%',
+            bgcolor: 'primary.main',
+            opacity: 0.12,
+            filter: 'blur(90px)',
+          }}
+        />
+      </Box>
 
-        <Stack component="form" spacing={2} onSubmit={handleSubmit} sx={{ mt: 2 }}>
-          {error && <Alert severity="error">{error}</Alert>}
-
-          <TextField
-            label="Téléphone ou email"
-            value={identifiant}
-            onChange={(e) => setIdentifiant(e.target.value)}
-            required
-            fullWidth
-          />
-          <PasswordField label="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} />
-
-          <Button type="submit" variant="contained" size="large" disabled={loading}>
-            Se connecter
-          </Button>
-
-          <Typography variant="body2" sx={{ textAlign: 'center' }}>
-            <Link to="/mot-de-passe-oublie">Mot de passe oublié ?</Link>
-          </Typography>
-
-          <Typography variant="body2" sx={{ textAlign: 'center' }}>
-            Pas encore de compte ? <Link to="/inscription">Inscris-toi</Link>
-          </Typography>
+      <Container maxWidth="xs" disableGutters>
+        <Stack sx={{ alignItems: 'center', mb: 3 }}>
+          <Logo size={40} />
         </Stack>
-      </Paper>
-    </Container>
+
+        <Paper variant="outlined" sx={{ p: { xs: 3, sm: 4 }, borderRadius: 4 }}>
+          <Stack spacing={0.5} sx={{ mb: 3 }}>
+            <Typography variant="h5" fontWeight={700}>
+              Connexion
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Accède à ton espace ProBF.
+            </Typography>
+          </Stack>
+
+          <Stack component="form" spacing={2} onSubmit={handleSubmit}>
+            {error && <Alert severity="error">{error}</Alert>}
+
+            <TextField
+              label="Téléphone ou email"
+              value={identifiant}
+              onChange={(e) => setIdentifiant(e.target.value)}
+              required
+              fullWidth
+              autoFocus
+            />
+            <PasswordField label="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} />
+
+            <Typography variant="body2" sx={{ textAlign: 'right' }}>
+              <Link component={RouterLink} to="/mot-de-passe-oublie" underline="hover">
+                Mot de passe oublié ?
+              </Link>
+            </Typography>
+
+            <Button type="submit" variant="contained" size="large" fullWidth disabled={loading}>
+              Se connecter
+            </Button>
+          </Stack>
+        </Paper>
+
+        <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', mt: 3 }}>
+          Pas encore de compte ?{' '}
+          <Link component={RouterLink} to="/inscription" underline="hover" fontWeight={600}>
+            Inscris-toi
+          </Link>
+        </Typography>
+      </Container>
+    </Box>
   )
 }
