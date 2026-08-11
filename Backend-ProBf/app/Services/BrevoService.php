@@ -10,19 +10,20 @@ use Illuminate\Support\Facades\Log;
 
 class BrevoService
 {
-    protected Brevo $client;
-
-    public function __construct()
-    {
-        $this->client = new Brevo(
-            apiKey: config('services.brevo.key'),
-        );
-    }
-
     public function send(string $toEmail, string $toName, string $subject, string $htmlContent)
     {
+        $apiKey = config('services.brevo.key');
+
+        if (! $apiKey) {
+            Log::warning('Brevo skipped: no API key configured', ['to' => $toEmail]);
+
+            return false;
+        }
+
         try {
-            return $this->client->transactionalEmails->sendTransacEmail(
+            $client = new Brevo(apiKey: $apiKey);
+
+            return $client->transactionalEmails->sendTransacEmail(
                 new SendTransacEmailRequest([
                     'htmlContent' => $htmlContent,
                     'sender' => new SendTransacEmailRequestSender([
