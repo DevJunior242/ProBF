@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Enums\RoleNom;
-use App\Models\Boost;
 use App\Models\Metier;
 use App\Models\Profile;
 use App\Models\Quartier;
@@ -11,23 +10,16 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
-class DemoDataSeeder extends Seeder
+class DemoProsSeeder extends Seeder
 {
     /**
-     * Seed 50 clients, 50 pros (profil + métiers + quartiers), et boost
-     * une partie des pros pour peupler la démo.
+     * Seed 50 pros de démo (profil + métiers + quartiers).
      */
     public function run(): void
     {
-        $clientRole = Role::where('nom', RoleNom::Client)->firstOrFail();
         $proRole = Role::where('nom', RoleNom::Pro)->firstOrFail();
         $metierIds = Metier::pluck('id')->all();
         $quartierIds = Quartier::pluck('id')->all();
-
-        $clients = User::factory()->count(50)->create();
-        foreach ($clients as $client) {
-            $client->roles()->attach($clientRole->id);
-        }
 
         $pros = User::factory()->count(50)->create();
         foreach ($pros as $pro) {
@@ -47,11 +39,6 @@ class DemoDataSeeder extends Seeder
             $pro->quartiers()->attach(fake()->randomElements($quartierIds, rand(1, 2)));
         }
 
-        $boostes = $pros->random(15);
-        foreach ($boostes as $pro) {
-            Boost::activerPour($pro, rand(1, 72));
-        }
-
-        $this->command?->info('50 clients, 50 pros, 15 boosts créés.');
+        $this->command?->info('50 pros créés.');
     }
 }
