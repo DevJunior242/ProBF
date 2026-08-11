@@ -1,0 +1,101 @@
+import { createTheme } from '@mui/material/styles'
+
+const brand = {
+  disponible: '#22C55E',
+  surRdv: '#F59E0B',
+  // Vert WhatsApp fixe : reste identique quel que soit le thème (clair/sombre),
+  // contrairement à `secondary` qui change avec IBC.
+  whatsapp: '#25D366',
+  whatsappDark: '#1DA851',
+}
+
+const shared = {
+  shape: {
+    borderRadius: 14,
+  },
+  typography: {
+    fontFamily: '"Inter", "Segoe UI", Roboto, sans-serif',
+    h1: { fontWeight: 700 },
+    h2: { fontWeight: 700 },
+    h3: { fontWeight: 700 },
+    h4: { fontWeight: 700 },
+    h5: { fontWeight: 600 },
+    h6: { fontWeight: 600 },
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+          borderRadius: 999,
+          fontWeight: 600,
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundImage: 'none',
+        },
+      },
+    },
+  },
+}
+
+const darkTheme = createTheme({
+  ...shared,
+  palette: {
+    mode: 'dark',
+    primary: {
+      main: '#F3680F',
+      light: '#FF7F34',
+      dark: '#B34C0C',
+      contrastText: '#050505',
+    },
+    secondary: {
+      main: '#F5F1E8',
+      contrastText: '#050505',
+    },
+    background: {
+      default: '#050505',
+      paper: '#121212',
+    },
+    text: {
+      primary: '#F5F1E8',
+      secondary: '#C7C0B2',
+    },
+    divider: 'rgba(255,255,255,0.12)',
+  },
+})
+
+const lightTheme = createTheme({
+  ...shared,
+  palette: {
+    mode: 'light',
+    primary: {
+      main: '#D9560A',
+      light: '#F3680F',
+      dark: '#B34C0C',
+      contrastText: '#050505',
+    },
+    secondary: {
+      main: '#1A1A1A',
+      contrastText: '#F5F1E8',
+    },
+    background: {
+      default: '#F7F5F0',
+      paper: '#FFFFFF',
+    },
+    text: {
+      primary: '#1A1A1A',
+      secondary: '#5C5648',
+    },
+    divider: 'rgba(0,0,0,0.12)',
+  },
+})
+
+export default function getTheme(mode) {
+  return mode === 'light' ? lightTheme : darkTheme
+}
+
+export { brand }
