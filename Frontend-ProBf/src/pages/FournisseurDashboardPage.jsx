@@ -55,6 +55,7 @@ export default function FournisseurDashboardPage() {
   const [produits, setProduits] = useState([])
   const [loading, setLoading] = useState(true)
   const [messageBoutique, setMessageBoutique] = useState(null)
+  const [messageProduit, setMessageProduit] = useState(null)
   const [produitForm, setProduitForm] = useState(PRODUIT_VIDE)
   const [editingId, setEditingId] = useState(null)
   const [boostOuvert, setBoostOuvert] = useState(false)
@@ -107,15 +108,24 @@ export default function FournisseurDashboardPage() {
 
   const soumettreProduit = async (e) => {
     e.preventDefault()
-    if (editingId) {
-      const { data } = await api.put(`/produits/${editingId}`, produitForm)
-      setProduits(produits.map((p) => (p.id === editingId ? { ...p, ...data } : p)))
-    } else {
-      const { data } = await api.post('/produits', produitForm)
-      setProduits([data, ...produits])
+    setMessageProduit(null)
+    try {
+      if (editingId) {
+        const { data } = await api.put(`/produits/${editingId}`, produitForm)
+        setProduits(produits.map((p) => (p.id === editingId ? { ...p, ...data } : p)))
+      } else {
+        const { data } = await api.post('/produits', produitForm)
+        setProduits([data, ...produits])
+      }
+      setProduitForm(PRODUIT_VIDE)
+      setEditingId(null)
+    } catch (err) {
+      if (err.response?.status === 403) {
+        setMessageProduit({ type: 'error', text: err.response.data?.message, verification: true })
+      } else {
+        setMessageProduit({ type: 'error', text: "Impossible d'enregistrer ce produit." })
+      }
     }
-    setProduitForm(PRODUIT_VIDE)
-    setEditingId(null)
   }
 
   const modifierProduit = (produit) => {
@@ -232,6 +242,20 @@ export default function FournisseurDashboardPage() {
       </Typography>
       <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
         <Stack component="form" spacing={2} onSubmit={soumettreProduit}>
+          {messageProduit && (
+            <Alert
+              severity={messageProduit.type}
+              action={
+                messageProduit.verification && (
+                  <Button color="inherit" size="small" component={Link} to="/verification">
+                    Vérifier
+                  </Button>
+                )
+              }
+            >
+              {messageProduit.text}
+            </Alert>
+          )}
           <PhotoUpload
             label="Photo du produit"
             type="produit"

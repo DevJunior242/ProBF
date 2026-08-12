@@ -31,6 +31,8 @@ class DemandeController extends Controller
 
     public function store(Request $request)
     {
+        abort_if(! $request->user()->estVerifie(), 403, "Tu dois d'abord vérifier ton identité (CNIB) pour publier une demande.");
+
         $data = $request->validate([
             'metier_id' => ['required', 'exists:metiers,id'],
             'quartier_id' => ['required', 'exists:quartiers,id'],

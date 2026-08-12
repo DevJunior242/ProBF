@@ -39,8 +39,16 @@ export function AuthProvider({ children }) {
 
   const hasRole = (role) => user?.roles?.some((r) => r.nom === role) ?? false
 
+  const updateUser = (partial) => {
+    setUser((prev) => {
+      const next = { ...prev, ...partial }
+      localStorage.setItem('probf-user', JSON.stringify(next))
+      return next
+    })
+  }
+
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, hasRole }}>
+    <AuthContext.Provider value={{ user, login, register, logout, hasRole, updateUser }}>
       {children}
     </AuthContext.Provider>
   )

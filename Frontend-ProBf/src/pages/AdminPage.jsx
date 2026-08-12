@@ -9,6 +9,7 @@ import AdminUtilisateurs from '../components/admin/AdminUtilisateurs'
 import AdminRetraits from '../components/admin/AdminRetraits'
 import AdminQuartiers from '../components/admin/AdminQuartiers'
 import AdminRapport from '../components/admin/AdminRapport'
+import AdminVerifications from '../components/admin/AdminVerifications'
 
 export default function AdminPage() {
   const [onglet, setOnglet] = useState(0)
@@ -28,6 +29,7 @@ export default function AdminPage() {
       >
         <Tab label="Dashboard" />
         <Tab label="Rapport" />
+        <Tab label="Vérifications CNIB" />
         <Tab label="Paiements à valider" />
         <Tab label="Moyens de paiement" />
         <Tab label="Tarifs" />
@@ -44,25 +46,28 @@ export default function AdminPage() {
         {onglet === 1 && <AdminRapport />}
       </Box>
       <Box role="tabpanel" hidden={onglet !== 2}>
-        {onglet === 2 && <AdminPaiements />}
+        {onglet === 2 && <AdminVerifications />}
       </Box>
       <Box role="tabpanel" hidden={onglet !== 3}>
-        {onglet === 3 && <AdminMoyensPaiement />}
+        {onglet === 3 && <AdminPaiements />}
       </Box>
       <Box role="tabpanel" hidden={onglet !== 4}>
-        {onglet === 4 && <AdminTarifs />}
+        {onglet === 4 && <AdminMoyensPaiement />}
       </Box>
       <Box role="tabpanel" hidden={onglet !== 5}>
-        {onglet === 5 && <AdminAbonnements />}
+        {onglet === 5 && <AdminTarifs />}
       </Box>
       <Box role="tabpanel" hidden={onglet !== 6}>
-        {onglet === 6 && <AdminRetraits />}
+        {onglet === 6 && <AdminAbonnements />}
       </Box>
       <Box role="tabpanel" hidden={onglet !== 7}>
-        {onglet === 7 && <AdminQuartiers />}
+        {onglet === 7 && <AdminRetraits />}
       </Box>
       <Box role="tabpanel" hidden={onglet !== 8}>
-        {onglet === 8 && <AdminUtilisateurs />}
+        {onglet === 8 && <AdminQuartiers />}
+      </Box>
+      <Box role="tabpanel" hidden={onglet !== 9}>
+        {onglet === 9 && <AdminUtilisateurs />}
       </Box>
     </Container>
   )

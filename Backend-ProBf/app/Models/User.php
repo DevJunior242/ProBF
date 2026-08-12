@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\RoleNom;
+use App\Enums\VerificationStatut;
 use App\Notifications\ResetPasswordNotification;
 use App\Notifications\VerifyEmailNotification;
 use Database\Factories\UserFactory;
@@ -11,6 +12,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -18,8 +20,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['nom', 'telephone', 'email', 'password', 'cgu_accepted_at'])]
-#[Hidden(['password', 'remember_token'])]
+#[Fillable(['nom', 'telephone', 'email', 'password', 'cgu_accepted_at', 'cnib_recto', 'cnib_verso', 'verification_statut', 'verification_rejet_raison', 'verifie_par_admin_id', 'verified_at'])]
+#[Hidden(['password', 'remember_token', 'cnib_recto', 'cnib_verso'])]
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
@@ -37,6 +39,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'cgu_accepted_at' => 'datetime',
             'password' => 'hashed',
+            'verification_statut' => VerificationStatut::class,
+            'verified_at' => 'datetime',
         ];
     }
 
@@ -48,6 +52,16 @@ class User extends Authenticatable implements MustVerifyEmail
     public function hasRole(RoleNom $role): bool
     {
         return $this->roles->contains('nom', $role);
+    }
+
+    public function estVerifie(): bool
+    {
+        return $this->verification_statut === VerificationStatut::Verifie;
+    }
+
+    public function verifiePar(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'verifie_par_admin_id');
     }
 
     /**

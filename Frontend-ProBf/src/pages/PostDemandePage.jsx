@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link as RouterLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Container,
@@ -94,6 +94,7 @@ export default function PostDemandePage() {
   const [description, setDescription] = useState('')
   const [urgence, setUrgence] = useState(false)
   const [error, setError] = useState(null)
+  const [erreurVerification, setErreurVerification] = useState(false)
   const [successMessage, setSuccessMessage] = useState(null)
   const [editingDemandeId, setEditingDemandeId] = useState(null)
 
@@ -172,8 +173,14 @@ export default function PostDemandePage() {
         setSuccessMessage('Demande envoyée ! Les pros du quartier vont être notifiés.')
       }
       resetForm()
-    } catch {
-      setError("Impossible d'envoyer ta demande, vérifie les champs.")
+    } catch (err) {
+      if (err.response?.status === 403) {
+        setError(err.response.data?.message)
+        setErreurVerification(true)
+      } else {
+        setError("Impossible d'envoyer ta demande, vérifie les champs.")
+        setErreurVerification(false)
+      }
     }
   }
 
@@ -195,8 +202,14 @@ export default function PostDemandePage() {
   }
 
   const repondre = async (demande) => {
-    const { data } = await api.post('/conversations', { client_id: demande.client.id })
-    navigate(`/messages?c=${data.id}`)
+    try {
+      const { data } = await api.post('/conversations', { client_id: demande.client.id })
+      navigate(`/messages?c=${data.id}`)
+    } catch (err) {
+      if (err.response?.status === 403) {
+        navigate('/verification')
+      }
+    }
   }
 
   const toggleStatutDemande = async (demande) => {
@@ -253,7 +266,18 @@ export default function PostDemandePage() {
             <AnimatePresence>
               {error && (
                 <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-                  <Alert severity="error">{error}</Alert>
+                  <Alert
+                    severity="error"
+                    action={
+                      erreurVerification && (
+                        <Button color="inherit" size="small" component={RouterLink} to="/verification">
+                          Vérifier
+                        </Button>
+                      )
+                    }
+                  >
+                    {error}
+                  </Alert>
                 </motion.div>
               )}
               {successMessage && (

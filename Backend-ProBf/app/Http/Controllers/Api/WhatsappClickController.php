@@ -7,23 +7,27 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\WhatsappClick;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class WhatsappClickController extends Controller
 {
     public function store(Request $request)
     {
+        abort_if(! $request->user()->estVerifie(), 403, "Tu dois d'abord vérifier ton identité (CNIB) pour contacter un pro.");
+
         $data = $request->validate([
             'pro_id' => ['required', 'exists:users,id'],
         ]);
 
-        User::whereHas('roles', fn ($q) => $q->where('nom', RoleNom::Pro))->findOrFail($data['pro_id']);
+        $pro = User::whereHas('roles', fn ($q) => $q->where('nom', RoleNom::Pro))->findOrFail($data['pro_id']);
 
         $click = WhatsappClick::create([
             'pro_id' => $data['pro_id'],
-            'client_id' => Auth::guard('sanctum')->user()?->id,
+            'client_id' => $request->user()->id,
         ]);
 
-        return response()->json($click, 201);
+        return response()->json([
+            'id' => $click->id,
+            'telephone' => $pro->telephone,
+        ], 201);
     }
 }

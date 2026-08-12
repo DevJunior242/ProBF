@@ -27,6 +27,8 @@ class ConversationController extends Controller
 
     public function store(Request $request)
     {
+        abort_if(! $request->user()->estVerifie(), 403, "Tu dois d'abord vérifier ton identité (CNIB) pour contacter quelqu'un.");
+
         $data = $request->validate([
             'pro_id' => ['required_without:client_id', 'nullable', 'exists:users,id'],
             'client_id' => ['required_without:pro_id', 'nullable', 'exists:users,id'],

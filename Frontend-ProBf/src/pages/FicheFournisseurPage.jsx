@@ -24,8 +24,18 @@ export default function FicheFournisseurPage() {
   }, [id])
 
   const contacterPourProduit = async (produit) => {
-    await api.post('/leads', { produit_id: produit.id })
-    window.open(`https://wa.me/${fournisseur.telephone.replace(/[^0-9]/g, '')}`, '_blank')
+    if (!user) {
+      navigate('/connexion')
+      return
+    }
+    try {
+      const { data } = await api.post('/leads', { produit_id: produit.id })
+      window.open(`https://wa.me/${data.telephone.replace(/[^0-9]/g, '')}`, '_blank')
+    } catch (err) {
+      if (err.response?.status === 403) {
+        navigate('/verification')
+      }
+    }
   }
 
   const envoyerMessage = async () => {
@@ -33,8 +43,14 @@ export default function FicheFournisseurPage() {
       navigate('/connexion')
       return
     }
-    const { data } = await api.post('/conversations', { pro_id: fournisseur.id })
-    navigate(`/messages?c=${data.id}`)
+    try {
+      const { data } = await api.post('/conversations', { pro_id: fournisseur.id })
+      navigate(`/messages?c=${data.id}`)
+    } catch (err) {
+      if (err.response?.status === 403) {
+        navigate('/verification')
+      }
+    }
   }
 
   if (loading) {
@@ -68,7 +84,8 @@ export default function FicheFournisseurPage() {
             variant="contained"
             size="large"
             startIcon={<WhatsAppIcon />}
-            onClick={() => window.open(`https://wa.me/${fournisseur.telephone.replace(/[^0-9]/g, '')}`, '_blank')}
+            disabled={!fournisseur.produits?.length}
+            onClick={() => contacterPourProduit(fournisseur.produits[0])}
             sx={{ bgcolor: brand.whatsapp, color: '#fff', '&:hover': { bgcolor: brand.whatsappDark } }}
           >
             Contacter

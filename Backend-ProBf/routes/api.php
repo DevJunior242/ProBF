@@ -27,6 +27,7 @@ use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\QuartierController;
 use App\Http\Controllers\Api\RetraitController;
 use App\Http\Controllers\Api\UploadController;
+use App\Http\Controllers\Api\VerificationController;
 use App\Http\Controllers\Api\WhatsappClickController;
 use Illuminate\Support\Facades\Route;
 
@@ -55,10 +56,14 @@ Route::get('fournisseurs/{id}', [FournisseurController::class, 'show']);
 Route::get('produits', [ProduitController::class, 'index']);
 Route::get('categories-produit', [CategorieProduitController::class, 'index']);
 Route::get('promos', [PromoController::class, 'index']);
-Route::post('whatsapp-clicks', [WhatsappClickController::class, 'store']);
-Route::post('leads', [LeadController::class, 'store']);
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::post('whatsapp-clicks', [WhatsappClickController::class, 'store']);
+    Route::post('leads', [LeadController::class, 'store']);
+
+    Route::get('verification', [VerificationController::class, 'show']);
+    Route::post('verification', [VerificationController::class, 'store']);
+
     Route::post('metiers', [MetierController::class, 'store']);
     Route::post('quartiers', [QuartierController::class, 'store']);
     Route::post('demandes', [DemandeController::class, 'store']);
@@ -130,6 +135,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('admin/quartiers', [QuartierController::class, 'adminIndex']);
         Route::delete('admin/quartiers/{quartier}', [QuartierController::class, 'destroy']);
+
+        Route::get('admin/verifications', [AdminController::class, 'verifications']);
+        Route::get('admin/verifications/{user}/document/{cote}', [AdminController::class, 'documentVerification']);
+        Route::patch('admin/verifications/{user}/approuver', [AdminController::class, 'approuverVerification']);
+        Route::patch('admin/verifications/{user}/rejeter', [AdminController::class, 'rejeterVerification']);
 
         Route::get('admin/dashboard', [AdminController::class, 'dashboard']);
         Route::get('admin/graphiques', [AdminController::class, 'graphiques']);

@@ -21,6 +21,7 @@ import ConfidentialitePage from './pages/ConfidentialitePage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import NotFoundPage from './pages/NotFoundPage'
+import VerificationPage from './pages/VerificationPage'
 
 function App() {
   return (
@@ -50,6 +51,7 @@ function App() {
         <Route path="/parrainage" element={<ParrainagePage />} />
         <Route path="/abonnement" element={<AbonnementPage />} />
         <Route path="/messages" element={<MessagesPage />} />
+        <Route path="/verification" element={<VerificationPage />} />
         <Route path="/admin" element={<AdminPage />} />
       </Route>
     </Routes>

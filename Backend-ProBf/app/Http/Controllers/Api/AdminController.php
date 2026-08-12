@@ -6,6 +6,7 @@ use App\Enums\RoleNom;
 use App\Enums\StatutAbonnement;
 use App\Enums\StatutDemande;
 use App\Enums\StatutPaiement;
+use App\Enums\VerificationStatut;
 use App\Http\Controllers\Api\Concerns\GenereSeriePeriodique;
 use App\Http\Controllers\Controller;
 use App\Models\Abonnement;
@@ -17,6 +18,7 @@ use App\Models\Profile;
 use App\Models\User;
 use App\Models\WhatsappClick;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
 {
@@ -286,5 +288,59 @@ class AdminController extends Controller
         $profile->update(['masque' => ! $profile->masque]);
 
         return $profile;
+    }
+
+    public function verifications(Request $request)
+    {
+        $statut = $request->query('statut', VerificationStatut::EnAttente->value);
+
+        return User::with('roles')
+            ->where('verification_statut', $statut)
+            ->orderBy('updated_at')
+            ->get();
+    }
+
+    public function documentVerification(User $user, string $cote)
+    {
+        abort_if(! in_array($cote, ['recto', 'verso']), 404);
+
+        $path = $cote === 'recto' ? $user->cnib_recto : $user->cnib_verso;
+
+        abort_if(! $path || ! Storage::disk('local')->exists($path), 404);
+
+        return Storage::disk('local')->response($path);
+    }
+
+    public function approuverVerification(Request $request, User $user)
+    {
+        $user->update([
+            'verification_statut' => VerificationStatut::Verifie,
+            'verifie_par_admin_id' => $request->user()->id,
+            'verified_at' => now(),
+            'verification_rejet_raison' => null,
+        ]);
+
+        if ($user->hasRole(RoleNom::Pro)) {
+            $user->profile()->updateOrCreate([], ['badge_verifie' => true]);
+        }
+
+        return $user->fresh();
+    }
+
+    public function rejeterVerification(Request $request, User $user)
+    {
+        $data = $request->validate([
+            'raison' => ['required', 'string', 'max:500'],
+        ], [
+            'raison.required' => 'Précise pourquoi tu rejettes cette vérification.',
+        ]);
+
+        $user->update([
+            'verification_statut' => VerificationStatut::Rejete,
+            'verification_rejet_raison' => $data['raison'],
+            'verifie_par_admin_id' => $request->user()->id,
+        ]);
+
+        return $user->fresh();
     }
 }

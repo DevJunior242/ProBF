@@ -44,8 +44,18 @@ export default function FichoProPage() {
   useEffect(chargerPro, [id])
 
   const contacterWhatsApp = async () => {
-    await api.post('/whatsapp-clicks', { pro_id: pro.id })
-    window.open(`https://wa.me/${pro.telephone.replace(/[^0-9]/g, '')}`, '_blank')
+    if (!user) {
+      navigate('/connexion')
+      return
+    }
+    try {
+      const { data } = await api.post('/whatsapp-clicks', { pro_id: pro.id })
+      window.open(`https://wa.me/${data.telephone.replace(/[^0-9]/g, '')}`, '_blank')
+    } catch (err) {
+      if (err.response?.status === 403) {
+        navigate('/verification')
+      }
+    }
   }
 
   const envoyerMessage = async () => {
@@ -53,8 +63,14 @@ export default function FichoProPage() {
       navigate('/connexion')
       return
     }
-    const { data } = await api.post('/conversations', { pro_id: pro.id })
-    navigate(`/messages?c=${data.id}`)
+    try {
+      const { data } = await api.post('/conversations', { pro_id: pro.id })
+      navigate(`/messages?c=${data.id}`)
+    } catch (err) {
+      if (err.response?.status === 403) {
+        navigate('/verification')
+      }
+    }
   }
 
   const envoyerAvis = async (e) => {

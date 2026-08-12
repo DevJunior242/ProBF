@@ -27,6 +27,7 @@ import ForumIcon from '@mui/icons-material/Forum'
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard'
 import PaymentIcon from '@mui/icons-material/Payment'
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
+import BadgeIcon from '@mui/icons-material/Badge'
 import LogoutIcon from '@mui/icons-material/Logout'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
@@ -70,6 +71,12 @@ export default function DashboardLayout() {
     ...(hasRole('fournisseur') ? [{ to: '/fournisseur/dashboard', label: 'Tableau de bord', icon: DashboardIcon }] : []),
     ...(!hasRole('pro') && !hasRole('fournisseur') ? [{ to: '/dashboard', label: 'Tableau de bord', icon: DashboardIcon }] : []),
     { to: '/messages', label: 'Messages', icon: ForumIcon },
+    {
+      to: '/verification',
+      label: user?.verification_statut === 3 ? 'Identité vérifiée' : 'Vérifier mon identité',
+      icon: BadgeIcon,
+      color: user?.verification_statut === 3 ? 'success.main' : 'warning.main',
+    },
     ...(hasRole('pro') || hasRole('fournisseur') ? [{ to: '/abonnement', label: 'Abonnement', icon: PaymentIcon }] : []),
     { to: '/parrainage', label: 'Parrainage', icon: CardGiftcardIcon },
     ...(hasRole('admin') ? [{ to: '/admin', label: 'Administration', icon: AdminPanelSettingsIcon }] : []),
@@ -109,10 +116,10 @@ export default function DashboardLayout() {
                 onClick={() => setMenuOuvert(false)}
                 sx={estReduite ? { justifyContent: 'center', px: 2 } : undefined}
               >
-                <ListItemIcon sx={{ minWidth: estReduite ? 0 : 40, justifyContent: 'center' }}>
+                <ListItemIcon sx={{ minWidth: estReduite ? 0 : 40, justifyContent: 'center', color: lien.color }}>
                   <lien.icon fontSize="small" />
                 </ListItemIcon>
-                {!estReduite && <ListItemText primary={lien.label} />}
+                {!estReduite && <ListItemText primary={lien.label} sx={lien.color ? { color: lien.color } : undefined} />}
               </ListItemButton>
             )
 

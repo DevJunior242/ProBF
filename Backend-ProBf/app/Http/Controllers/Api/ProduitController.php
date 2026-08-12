@@ -19,6 +19,8 @@ class ProduitController extends Controller
 
     public function store(Request $request)
     {
+        abort_if(! $request->user()->estVerifie(), 403, "Tu dois d'abord vérifier ton identité (CNIB) pour publier un produit.");
+
         $data = $request->validate([
             'metier_id' => ['nullable', 'exists:metiers,id'],
             'categorie_id' => ['nullable', 'exists:categories_produit,id'],

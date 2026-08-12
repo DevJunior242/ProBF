@@ -27,6 +27,8 @@ class ProController extends Controller
             ->addSelect('users.*')
             ->paginate(20);
 
+        $pros->getCollection()->each(fn (User $pro) => $pro->makeHidden('telephone'));
+
         return $pros;
     }
 
@@ -36,6 +38,6 @@ class ProController extends Controller
             ->with(['profile', 'metiers', 'quartiers', 'portfolios', 'avisRecus.client'])
             ->findOrFail($id);
 
-        return $pro;
+        return $pro->makeHidden('telephone');
     }
 }
