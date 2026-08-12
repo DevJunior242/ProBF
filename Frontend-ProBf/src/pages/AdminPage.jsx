@@ -8,6 +8,7 @@ import AdminAbonnements from '../components/admin/AdminAbonnements'
 import AdminUtilisateurs from '../components/admin/AdminUtilisateurs'
 import AdminRetraits from '../components/admin/AdminRetraits'
 import AdminQuartiers from '../components/admin/AdminQuartiers'
+import AdminRapport from '../components/admin/AdminRapport'
 
 export default function AdminPage() {
   const [onglet, setOnglet] = useState(0)
@@ -26,6 +27,7 @@ export default function AdminPage() {
         sx={{ mb: 3, borderBottom: 1, borderColor: 'divider' }}
       >
         <Tab label="Dashboard" />
+        <Tab label="Rapport" />
         <Tab label="Paiements à valider" />
         <Tab label="Moyens de paiement" />
         <Tab label="Tarifs" />
@@ -39,25 +41,28 @@ export default function AdminPage() {
         {onglet === 0 && <AdminDashboard />}
       </Box>
       <Box role="tabpanel" hidden={onglet !== 1}>
-        {onglet === 1 && <AdminPaiements />}
+        {onglet === 1 && <AdminRapport />}
       </Box>
       <Box role="tabpanel" hidden={onglet !== 2}>
-        {onglet === 2 && <AdminMoyensPaiement />}
+        {onglet === 2 && <AdminPaiements />}
       </Box>
       <Box role="tabpanel" hidden={onglet !== 3}>
-        {onglet === 3 && <AdminTarifs />}
+        {onglet === 3 && <AdminMoyensPaiement />}
       </Box>
       <Box role="tabpanel" hidden={onglet !== 4}>
-        {onglet === 4 && <AdminAbonnements />}
+        {onglet === 4 && <AdminTarifs />}
       </Box>
       <Box role="tabpanel" hidden={onglet !== 5}>
-        {onglet === 5 && <AdminRetraits />}
+        {onglet === 5 && <AdminAbonnements />}
       </Box>
       <Box role="tabpanel" hidden={onglet !== 6}>
-        {onglet === 6 && <AdminQuartiers />}
+        {onglet === 6 && <AdminRetraits />}
       </Box>
       <Box role="tabpanel" hidden={onglet !== 7}>
-        {onglet === 7 && <AdminUtilisateurs />}
+        {onglet === 7 && <AdminQuartiers />}
+      </Box>
+      <Box role="tabpanel" hidden={onglet !== 8}>
+        {onglet === 8 && <AdminUtilisateurs />}
       </Box>
     </Container>
   )

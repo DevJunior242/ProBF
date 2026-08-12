@@ -74,6 +74,88 @@ class AdminController extends Controller
         ];
     }
 
+    public function rapport(Request $request)
+    {
+        $periode = $request->query('periode', 'mois');
+
+        if ($periode === 'annee') {
+            $annee = (int) $request->query('valeur', now()->year);
+            $debut = now()->setDate($annee, 1, 1)->startOfYear();
+            $fin = $debut->copy()->endOfYear();
+            $debutPrecedent = $debut->copy()->subYear();
+            $finPrecedent = $debutPrecedent->copy()->endOfYear();
+            $label = (string) $annee;
+        } else {
+            $valeur = $request->query('valeur', now()->format('Y-m'));
+            $debut = \Illuminate\Support\Carbon::createFromFormat('Y-m', $valeur)->startOfMonth();
+            $fin = $debut->copy()->endOfMonth();
+            $debutPrecedent = $debut->copy()->subMonth();
+            $finPrecedent = $debutPrecedent->copy()->endOfMonth();
+            $label = $debut->translatedFormat('F Y');
+        }
+
+        $paiementsValides = fn ($q) => $q->where('statut', StatutPaiement::Valide);
+
+        $revenuPeriode = (float) Paiement::where($paiementsValides)
+            ->whereBetween('updated_at', [$debut, $fin])->sum('montant');
+        $revenuPrecedent = (float) Paiement::where($paiementsValides)
+            ->whereBetween('updated_at', [$debutPrecedent, $finPrecedent])->sum('montant');
+
+        $revenuParContexte = Paiement::where($paiementsValides)
+            ->whereBetween('updated_at', [$debut, $fin])
+            ->selectRaw('contexte, sum(montant) as total')
+            ->groupBy('contexte')
+            ->pluck('total', 'contexte');
+
+        $nouveauxParRole = fn (RoleNom $role) => User::whereHas('roles', fn ($q) => $q->where('nom', $role))
+            ->whereBetween('created_at', [$debut, $fin])->count();
+
+        $nouveauxTotal = User::whereBetween('created_at', [$debut, $fin])->count();
+        $nouveauxPrecedent = User::whereBetween('created_at', [$debutPrecedent, $finPrecedent])->count();
+
+        $topMetiers = Demande::whereBetween('demandes.created_at', [$debut, $fin])
+            ->join('metiers', 'metiers.id', '=', 'demandes.metier_id')
+            ->selectRaw('metiers.nom, count(*) as total')
+            ->groupBy('metiers.id', 'metiers.nom')
+            ->orderByDesc('total')
+            ->limit(5)
+            ->get();
+
+        $topQuartiers = Demande::whereBetween('demandes.created_at', [$debut, $fin])
+            ->join('quartiers', 'quartiers.id', '=', 'demandes.quartier_id')
+            ->selectRaw('quartiers.nom, count(*) as total')
+            ->groupBy('quartiers.id', 'quartiers.nom')
+            ->orderByDesc('total')
+            ->limit(5)
+            ->get();
+
+        return [
+            'periode' => $periode,
+            'label' => $label,
+            'revenu_total' => $revenuPeriode,
+            'revenu_variation_pct' => $revenuPrecedent > 0
+                ? round((($revenuPeriode - $revenuPrecedent) / $revenuPrecedent) * 100, 1)
+                : null,
+            'revenu_par_contexte' => $revenuParContexte,
+            'nouveaux_utilisateurs' => [
+                'total' => $nouveauxTotal,
+                'clients' => $nouveauxParRole(RoleNom::Client),
+                'pros' => $nouveauxParRole(RoleNom::Pro),
+                'fournisseurs' => $nouveauxParRole(RoleNom::Fournisseur),
+                'variation_pct' => $nouveauxPrecedent > 0
+                    ? round((($nouveauxTotal - $nouveauxPrecedent) / $nouveauxPrecedent) * 100, 1)
+                    : null,
+            ],
+            'demandes_total' => Demande::whereBetween('created_at', [$debut, $fin])->count(),
+            'avis_total' => Avis::whereBetween('created_at', [$debut, $fin])->count(),
+            'whatsapp_clicks_total' => WhatsappClick::whereBetween('created_at', [$debut, $fin])->count(),
+            'abonnements_actifs' => Abonnement::where('statut', StatutAbonnement::Actif)
+                ->where('date_fin', '>=', $fin)->count(),
+            'top_metiers' => $topMetiers,
+            'top_quartiers' => $topQuartiers,
+        ];
+    }
+
     public function activite(Request $request)
     {
         $jours = (int) $request->query('jours', 1);

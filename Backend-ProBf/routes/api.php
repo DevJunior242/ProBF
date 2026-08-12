@@ -133,6 +133,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('admin/dashboard', [AdminController::class, 'dashboard']);
         Route::get('admin/graphiques', [AdminController::class, 'graphiques']);
+        Route::get('admin/rapport', [AdminController::class, 'rapport']);
         Route::get('admin/activite', [AdminController::class, 'activite']);
         Route::get('admin/abonnements', [AdminController::class, 'abonnements']);
         Route::get('admin/utilisateurs', [AdminController::class, 'utilisateurs']);
