@@ -1,6 +1,8 @@
 import { Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout'
 import DashboardLayout from './components/DashboardLayout'
+import ProtectedRoute from './components/ProtectedRoute'
+import GuestRoute from './components/GuestRoute'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
@@ -28,9 +30,11 @@ function App() {
     <Routes>
       {/* Pages publiques : navbar classique */}
       <Route element={<Layout />}>
+        <Route element={<GuestRoute />}>
+          <Route path="/connexion" element={<LoginPage />} />
+          <Route path="/inscription" element={<RegisterPage />} />
+        </Route>
         <Route path="/" element={<HomePage />} />
-        <Route path="/connexion" element={<LoginPage />} />
-        <Route path="/inscription" element={<RegisterPage />} />
         <Route path="/mot-de-passe-oublie" element={<ForgotPasswordPage />} />
         <Route path="/reinitialiser-mot-de-passe" element={<ResetPasswordPage />} />
         <Route path="/pros" element={<ProsPage />} />
@@ -43,16 +47,20 @@ function App() {
         <Route path="*" element={<NotFoundPage />} />
       </Route>
 
-      {/* Espace connecté : sidebar */}
-      <Route element={<DashboardLayout />}>
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/profil" element={<ProfileEditPage />} />
-        <Route path="/fournisseur/dashboard" element={<FournisseurDashboardPage />} />
-        <Route path="/parrainage" element={<ParrainagePage />} />
-        <Route path="/abonnement" element={<AbonnementPage />} />
-        <Route path="/messages" element={<MessagesPage />} />
-        <Route path="/verification" element={<VerificationPage />} />
-        <Route path="/admin" element={<AdminPage />} />
+      {/* Espace connecté : sidebar, protégé */}
+      <Route element={<ProtectedRoute />}>
+        <Route element={<DashboardLayout />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/profil" element={<ProfileEditPage />} />
+          <Route path="/fournisseur/dashboard" element={<FournisseurDashboardPage />} />
+          <Route path="/parrainage" element={<ParrainagePage />} />
+          <Route path="/abonnement" element={<AbonnementPage />} />
+          <Route path="/messages" element={<MessagesPage />} />
+          <Route path="/verification" element={<VerificationPage />} />
+          <Route element={<ProtectedRoute role="admin" />}>
+            <Route path="/admin" element={<AdminPage />} />
+          </Route>
+        </Route>
       </Route>
     </Routes>
   )

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, Link as RouterLink } from 'react-router-dom'
+import { useNavigate, useLocation, Link as RouterLink } from 'react-router-dom'
 import { Container, TextField, Button, Typography, Stack, Alert, Paper, Box, Link } from '@mui/material'
 import { useAuth } from '../context/AuthContext'
 import PasswordField from '../components/PasswordField'
@@ -8,6 +8,7 @@ import Logo from '../components/Logo'
 export default function LoginPage() {
   const { login } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const [identifiant, setIdentifiant] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
@@ -19,7 +20,8 @@ export default function LoginPage() {
     setLoading(true)
     try {
       await login(identifiant, password)
-      navigate('/')
+      const destination = location.state?.from?.pathname ?? '/'
+      navigate(destination, { replace: true })
     } catch {
       setError('Identifiants incorrects.')
     } finally {
