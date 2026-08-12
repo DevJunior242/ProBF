@@ -6,6 +6,7 @@ import api from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import DashboardTrendChart from '../components/DashboardTrendChart'
 import BoostDialog from '../components/BoostDialog'
+import AjouterRoleCard from '../components/AjouterRoleCard'
 
 function StatCard({ label, value }) {
   return (
@@ -31,11 +32,12 @@ export default function DashboardPage() {
   const [boostOuvert, setBoostOuvert] = useState(false)
 
   useEffect(() => {
-    api.get('/dashboard/stats').then(({ data }) => {
+    api.get('/dashboard/stats', { params: { espace: estPro ? 'pro' : 'client' } }).then(({ data }) => {
       setStats(data)
       setDispo(data.statut_dispo ?? 1)
       setLoading(false)
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const changerDispo = async (_, value) => {
@@ -113,7 +115,7 @@ export default function DashboardPage() {
         )}
       </Grid>
 
-      <DashboardTrendChart />
+      <DashboardTrendChart params={{ espace: estPro ? 'pro' : 'client' }} />
 
       {estPro && joursAvantExpiration !== null && joursAvantExpiration <= 7 && (
         <Alert severity="warning" sx={{ mt: 3 }}>
@@ -145,6 +147,8 @@ export default function DashboardPage() {
       )}
 
       <BoostDialog open={boostOuvert} onClose={() => setBoostOuvert(false)} type={1} />
+
+      <AjouterRoleCard />
     </Container>
   )
 }

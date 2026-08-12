@@ -3,13 +3,14 @@ import { Paper, Stack, Typography, ToggleButtonGroup, ToggleButton } from '@mui/
 import { LineChart } from '@mui/x-charts/LineChart'
 import api from '../api/client'
 
-export default function DashboardTrendChart({ endpoint = '/dashboard/graphiques', color = '#F3680F' }) {
+export default function DashboardTrendChart({ endpoint = '/dashboard/graphiques', color = '#F3680F', params = {} }) {
   const [periode, setPeriode] = useState('jour')
   const [data, setData] = useState(null)
 
   useEffect(() => {
-    api.get(endpoint, { params: { periode } }).then(({ data }) => setData(data))
-  }, [endpoint, periode])
+    api.get(endpoint, { params: { periode, ...params } }).then(({ data }) => setData(data))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [endpoint, periode, JSON.stringify(params)])
 
   const labels = data?.donnees.map((d) => d.periode) ?? []
   const valeurs = data?.donnees.map((d) => d.total) ?? []

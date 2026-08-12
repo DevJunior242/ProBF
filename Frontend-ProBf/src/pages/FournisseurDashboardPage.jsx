@@ -28,6 +28,7 @@ import DashboardTrendChart from '../components/DashboardTrendChart'
 import BoostDialog from '../components/BoostDialog'
 import PromoDialog from '../components/PromoDialog'
 import AjouterMetierDialog from '../components/AjouterMetierDialog'
+import AjouterRoleCard from '../components/AjouterRoleCard'
 
 function StatCard({ label, value }) {
   return (
@@ -66,7 +67,7 @@ export default function FournisseurDashboardPage() {
   const charger = () => {
     setLoading(true)
     Promise.all([
-      api.get('/dashboard/stats'),
+      api.get('/dashboard/stats', { params: { espace: 'fournisseur' } }),
       api.get('/metiers'),
       api.get('/categories-produit'),
       api.get('/fournisseur-profile'),
@@ -180,7 +181,9 @@ export default function FournisseurDashboardPage() {
         </Alert>
       )}
 
-      <Stack direction="row" spacing={2} sx={{ mb: 4, alignItems: 'center', flexWrap: 'wrap' }}>
+      <AjouterRoleCard />
+
+      <Stack direction="row" spacing={2} sx={{ mb: 4, mt: 3, alignItems: 'center', flexWrap: 'wrap' }}>
         <Typography color="text.secondary">
           Abonnement :{' '}
           {stats.abonnement_actif
@@ -204,7 +207,7 @@ export default function FournisseurDashboardPage() {
       <BoostDialog open={boostOuvert} onClose={() => setBoostOuvert(false)} type={2} />
 
       <Box sx={{ mb: 4 }}>
-        <DashboardTrendChart />
+        <DashboardTrendChart params={{ espace: 'fournisseur' }} />
       </Box>
 
       <Typography variant="h5" fontWeight={700} gutterBottom>

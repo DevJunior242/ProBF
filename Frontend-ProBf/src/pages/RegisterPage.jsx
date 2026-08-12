@@ -34,7 +34,7 @@ export default function RegisterPage() {
     email: "",
     password: "",
     password_confirmation: "",
-    role: "client",
+    roles: ["client"],
   });
   const [cguAccepted, setCguAccepted] = useState(false);
   const [error, setError] = useState(null);
@@ -129,37 +129,41 @@ export default function RegisterPage() {
               </Alert>
             )}
 
-            <ToggleButtonGroup
-              exclusive
-              fullWidth
-              value={form.role}
-              onChange={(_, value) => value && setForm({ ...form, role: value })}
-            >
-              <ToggleButton value="client">
-                <Stack spacing={0.5} sx={{ alignItems: "center", py: 0.5 }}>
-                  <PersonOutlineIcon fontSize="small" />
-                  <Typography variant="caption" fontWeight={600}>
-                    Client
-                  </Typography>
-                </Stack>
-              </ToggleButton>
-              <ToggleButton value="pro">
-                <Stack spacing={0.5} sx={{ alignItems: "center", py: 0.5 }}>
-                  <HandymanOutlinedIcon fontSize="small" />
-                  <Typography variant="caption" fontWeight={600}>
-                    Pro
-                  </Typography>
-                </Stack>
-              </ToggleButton>
-              <ToggleButton value="fournisseur">
-                <Stack spacing={0.5} sx={{ alignItems: "center", py: 0.5 }}>
-                  <Inventory2OutlinedIcon fontSize="small" />
-                  <Typography variant="caption" fontWeight={600}>
-                    Fournisseur
-                  </Typography>
-                </Stack>
-              </ToggleButton>
-            </ToggleButtonGroup>
+            <Stack spacing={0.5}>
+              <ToggleButtonGroup
+                fullWidth
+                value={form.roles}
+                onChange={(_, values) => values.length && setForm({ ...form, roles: values })}
+              >
+                <ToggleButton value="client">
+                  <Stack spacing={0.5} sx={{ alignItems: "center", py: 0.5 }}>
+                    <PersonOutlineIcon fontSize="small" />
+                    <Typography variant="caption" fontWeight={600}>
+                      Client
+                    </Typography>
+                  </Stack>
+                </ToggleButton>
+                <ToggleButton value="pro">
+                  <Stack spacing={0.5} sx={{ alignItems: "center", py: 0.5 }}>
+                    <HandymanOutlinedIcon fontSize="small" />
+                    <Typography variant="caption" fontWeight={600}>
+                      Pro
+                    </Typography>
+                  </Stack>
+                </ToggleButton>
+                <ToggleButton value="fournisseur">
+                  <Stack spacing={0.5} sx={{ alignItems: "center", py: 0.5 }}>
+                    <Inventory2OutlinedIcon fontSize="small" />
+                    <Typography variant="caption" fontWeight={600}>
+                      Fournisseur
+                    </Typography>
+                  </Stack>
+                </ToggleButton>
+              </ToggleButtonGroup>
+              <Typography variant="caption" color="text.secondary">
+                Tu peux cocher plusieurs profils, par exemple Pro et Fournisseur.
+              </Typography>
+            </Stack>
 
             <TextField
               label="Nom complet"

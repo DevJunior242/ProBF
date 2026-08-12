@@ -17,12 +17,17 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
+        $rolesAutorises = [RoleNom::Client->value, RoleNom::Pro->value, RoleNom::Fournisseur->value];
+
         $data = $request->validate([
             'nom' => ['required', 'string', 'max:255'],
             'telephone' => ['required', 'string', 'unique:users,telephone'],
             'email' => ['required', 'email', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'role' => ['nullable', Rule::in([RoleNom::Client->value, RoleNom::Pro->value, RoleNom::Fournisseur->value])],
+            'roles' => ['nullable', 'array'],
+            'roles.*' => [Rule::in($rolesAutorises)],
+            // rétrocompat : l'ancien champ "role" (singulier) est encore accepté
+            'role' => ['nullable', Rule::in($rolesAutorises)],
             'cgu_accepted' => ['required', 'accepted'],
         ]);
 
@@ -34,8 +39,11 @@ class AuthController extends Controller
             'cgu_accepted_at' => now(),
         ]);
 
-        $role = Role::where('nom', RoleNom::from($data['role'] ?? RoleNom::Client->value))->firstOrFail();
-        $user->roles()->attach($role);
+        $nomsRoles = $data['roles'] ?? array_filter([$data['role'] ?? null]);
+        $nomsRoles = empty($nomsRoles) ? [RoleNom::Client->value] : array_unique($nomsRoles);
+
+        $roleIds = Role::whereIn('nom', array_map(fn ($r) => RoleNom::from($r), $nomsRoles))->pluck('id');
+        $user->roles()->attach($roleIds);
 
         event(new Registered($user));
 
@@ -66,6 +74,26 @@ class AuthController extends Controller
             'user' => $user->load('roles'),
             'token' => $user->createToken('api')->plainTextToken,
         ]);
+    }
+
+    public function ajouterRole(Request $request)
+    {
+        $data = $request->validate([
+            'role' => ['required', Rule::in([RoleNom::Pro->value, RoleNom::Fournisseur->value])],
+        ], [
+            'role.required' => 'Précise quel rôle ajouter.',
+            'role.in' => 'Rôle invalide.',
+        ]);
+
+        $user = $request->user();
+        $roleNom = RoleNom::from($data['role']);
+
+        abort_if($user->hasRole($roleNom), 422, 'Tu as déjà ce rôle sur ton compte.');
+
+        $role = Role::where('nom', $roleNom)->firstOrFail();
+        $user->roles()->attach($role);
+
+        return $user->load('roles');
     }
 
     public function logout(Request $request)

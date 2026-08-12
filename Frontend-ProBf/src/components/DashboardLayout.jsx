@@ -63,12 +63,14 @@ export default function DashboardLayout() {
     navigate('/')
   }
 
+  const doubleProFournisseur = hasRole('pro') && hasRole('fournisseur')
+
   const liens = [
     ...(hasRole('pro') ? [
-      { to: '/dashboard', label: 'Tableau de bord', icon: DashboardIcon },
+      { to: '/dashboard', label: doubleProFournisseur ? 'Tableau de bord (Pro)' : 'Tableau de bord', icon: DashboardIcon },
       { to: '/profil', label: 'Mon profil', icon: PersonIcon },
     ] : []),
-    ...(hasRole('fournisseur') ? [{ to: '/fournisseur/dashboard', label: 'Tableau de bord', icon: DashboardIcon }] : []),
+    ...(hasRole('fournisseur') ? [{ to: '/fournisseur/dashboard', label: doubleProFournisseur ? 'Tableau de bord (Fournisseur)' : 'Tableau de bord', icon: DashboardIcon }] : []),
     ...(!hasRole('pro') && !hasRole('fournisseur') ? [{ to: '/dashboard', label: 'Tableau de bord', icon: DashboardIcon }] : []),
     { to: '/messages', label: 'Messages', icon: ForumIcon },
     {

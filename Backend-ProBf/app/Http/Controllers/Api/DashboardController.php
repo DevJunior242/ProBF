@@ -18,19 +18,41 @@ class DashboardController extends Controller
 {
     use GenereSeriePeriodique;
 
+    /**
+     * Un compte peut cumuler plusieurs rôles (ex: Pro + Fournisseur) ; "espace"
+     * précise quel tableau de bord est demandé. Sans "espace" (anciens clients),
+     * on garde l'ancienne priorité fournisseur > pro > client.
+     */
+    private function resoudreEspace(User $user, ?string $espace): string
+    {
+        if ($espace === 'fournisseur' && $user->hasRole(RoleNom::Fournisseur)) {
+            return 'fournisseur';
+        }
+
+        if ($espace === 'pro' && $user->hasRole(RoleNom::Pro)) {
+            return 'pro';
+        }
+
+        if ($user->hasRole(RoleNom::Fournisseur)) {
+            return 'fournisseur';
+        }
+
+        if ($user->hasRole(RoleNom::Pro)) {
+            return 'pro';
+        }
+
+        return 'client';
+    }
+
     public function stats(Request $request)
     {
         $user = $request->user();
 
-        if ($user->hasRole(RoleNom::Fournisseur)) {
-            return $this->statsFournisseur($user);
-        }
-
-        if ($user->hasRole(RoleNom::Pro)) {
-            return $this->statsPro($user);
-        }
-
-        return $this->statsClient($user);
+        return match ($this->resoudreEspace($user, $request->query('espace'))) {
+            'fournisseur' => $this->statsFournisseur($user),
+            'pro' => $this->statsPro($user),
+            default => $this->statsClient($user),
+        };
     }
 
     public function graphiques(Request $request)
@@ -43,7 +65,7 @@ class DashboardController extends Controller
             default => ['%Y-%m-%d', now()->subDays(13)->startOfDay(), 'addDay'],
         };
 
-        if ($user->hasRole(RoleNom::Fournisseur)) {
+        if ($this->resoudreEspace($user, $request->query('espace')) === 'fournisseur') {
             $produitIds = $user->produits()->pluck('id');
             $serie = Lead::whereIn('produit_id', $produitIds)
                 ->selectRaw("DATE_FORMAT(created_at, '{$format}') as periode, count(*) as total")

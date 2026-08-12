@@ -43,6 +43,7 @@ Route::prefix('auth')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('logout', [AuthController::class, 'logout']);
         Route::post('email/resend', [AuthController::class, 'resendVerification']);
+        Route::post('roles', [AuthController::class, 'ajouterRole']);
     });
 });
 
