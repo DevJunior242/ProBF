@@ -24,6 +24,7 @@ import Footer from './Footer'
 import Logo from './Logo'
 import MessagingIcon from './MessagingIcon'
 import NotificationIcon from './NotificationIcon'
+import ChatbotWidget from './ChatbotWidget'
 
 export default function Layout() {
   const { mode, toggleMode } = useThemeMode()
@@ -146,6 +147,7 @@ export default function Layout() {
       </Box>
 
       <Footer />
+      <ChatbotWidget />
     </Box>
   )
 }
