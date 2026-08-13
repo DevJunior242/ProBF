@@ -24,6 +24,21 @@ import ElectricalServicesIcon from "@mui/icons-material/ElectricalServices";
 import PlumbingIcon from "@mui/icons-material/Plumbing";
 import AcUnitIcon from "@mui/icons-material/AcUnit";
 import BuildIcon from "@mui/icons-material/Build";
+import ConstructionIcon from "@mui/icons-material/Construction";
+import CarpenterIcon from "@mui/icons-material/Carpenter";
+import FormatPaintIcon from "@mui/icons-material/FormatPaint";
+import CarRepairIcon from "@mui/icons-material/CarRepair";
+import GridOnIcon from "@mui/icons-material/GridOn";
+import ArchitectureIcon from "@mui/icons-material/Architecture";
+import VpnKeyIcon from "@mui/icons-material/VpnKey";
+import GrassIcon from "@mui/icons-material/Grass";
+import CheckroomIcon from "@mui/icons-material/Checkroom";
+import ContentCutIcon from "@mui/icons-material/ContentCut";
+import CleaningServicesIcon from "@mui/icons-material/CleaningServices";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import WindowIcon from "@mui/icons-material/Window";
+import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
+import ComputerIcon from "@mui/icons-material/Computer";
 import CampaignIcon from "@mui/icons-material/Campaign";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -36,6 +51,22 @@ const ICONES_METIER = {
   electricien: ElectricalServicesIcon,
   plombier: PlumbingIcon,
   "froid-climatisation": AcUnitIcon,
+  macon: ConstructionIcon,
+  menuisier: CarpenterIcon,
+  "peintre-en-batiment": FormatPaintIcon,
+  "soudeur-metallier": BuildIcon,
+  "mecanicien-auto": CarRepairIcon,
+  carreleur: GridOnIcon,
+  plaquiste: ArchitectureIcon,
+  serrurier: VpnKeyIcon,
+  "jardinier-paysagiste": GrassIcon,
+  "couturier-tailleur": CheckroomIcon,
+  "coiffeur-estheticienne": ContentCutIcon,
+  "nettoyage-menage": CleaningServicesIcon,
+  demenagement: LocalShippingIcon,
+  vitrier: WindowIcon,
+  photographe: PhotoCameraIcon,
+  "informatique-reparation": ComputerIcon,
 };
 const MOTS_ROTATIFS = [
   "Électricien",
@@ -58,12 +89,7 @@ const MOTS_ROTATIFS = [
   "Photographe",
   "Informatique / Réparation",
 ];
-// const MOTS_ROTATIFS = [
-//   "Électricien",
-//   "Plombier",
-//   "Technicien froid",
-//   "artisan",
-// ];
+
 const ROTATION_MS = 2600;
 
 const ETAPES = [
