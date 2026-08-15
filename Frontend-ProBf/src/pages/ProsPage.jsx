@@ -13,8 +13,11 @@ import {
   InputAdornment,
 } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
+import WifiOffIcon from '@mui/icons-material/WifiOff'
 import api from '../api/client'
 import CardPro from '../components/CardPro'
+import { db } from '../offline/db'
+import { cacherMetiers, cacherQuartiers, chargerMetiersCache, chargerQuartiersCache } from '../offline/referentiels'
 
 export default function ProsPage() {
   const [searchParams] = useSearchParams()
@@ -30,12 +33,22 @@ export default function ProsPage() {
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [horsLigne, setHorsLigne] = useState(false)
 
   useEffect(() => {
-    Promise.all([api.get('/metiers'), api.get('/quartiers')]).then(([m, q]) => {
-      setMetiers(m.data)
-      setQuartiers(q.data)
-    })
+    Promise.all([api.get('/metiers'), api.get('/quartiers')])
+      .then(([m, q]) => {
+        setMetiers(m.data)
+        setQuartiers(q.data)
+        cacherMetiers(m.data)
+        cacherQuartiers(q.data)
+      })
+      .catch(() => {
+        Promise.all([chargerMetiersCache(), chargerQuartiersCache()]).then(([m, q]) => {
+          setMetiers(m)
+          setQuartiers(q)
+        })
+      })
   }, [])
 
   useEffect(() => {
@@ -47,24 +60,41 @@ export default function ProsPage() {
   }, [rechercheSaisie])
 
   useEffect(() => {
-    setLoading(true)
-    setError(null)
-    api
-      .get('/pros', {
-        params: {
-          metier: metier || undefined,
-          quartier: quartierId || undefined,
-          recherche: recherche || undefined,
-          page,
-        },
-      })
-      .then(({ data }) => {
+    const cleCache = JSON.stringify({ metier, quartierId, recherche, page })
+
+    async function chargerPros() {
+      setLoading(true)
+      setError(null)
+      setHorsLigne(false)
+      try {
+        const { data } = await api.get('/pros', {
+          params: {
+            metier: metier || undefined,
+            quartier: quartierId || undefined,
+            recherche: recherche || undefined,
+            page,
+          },
+        })
         setPros(data.data)
         setDernierePage(data.last_page)
         setTotal(data.total)
-      })
-      .catch(() => setError("Impossible de charger les pros pour l'instant."))
-      .finally(() => setLoading(false))
+        await db.prosQueries.put({ id: cleCache, pros: data.data, dernierePage: data.last_page, total: data.total })
+      } catch {
+        const cache = await db.prosQueries.get(cleCache)
+        if (cache) {
+          setPros(cache.pros)
+          setDernierePage(cache.dernierePage)
+          setTotal(cache.total)
+          setHorsLigne(true)
+        } else {
+          setError("Impossible de charger les pros pour l'instant.")
+        }
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    chargerPros()
   }, [metier, quartierId, recherche, page])
 
   return (
@@ -143,6 +173,11 @@ export default function ProsPage() {
       </Stack>
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {horsLigne && (
+        <Alert severity="warning" icon={<WifiOffIcon fontSize="small" />} sx={{ mb: 2 }}>
+          Pas de connexion : résultats affichés depuis ta dernière consultation.
+        </Alert>
+      )}
 
       {loading ? (
         <CircularProgress />

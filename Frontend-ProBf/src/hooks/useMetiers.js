@@ -1,11 +1,20 @@
 import { useEffect, useState } from 'react'
 import api from '../api/client'
+import { cacherMetiers, chargerMetiersCache } from '../offline/referentiels'
 
 export default function useMetiers() {
   const [metiers, setMetiers] = useState([])
 
   useEffect(() => {
-    api.get('/metiers').then(({ data }) => setMetiers(data))
+    api
+      .get('/metiers')
+      .then(({ data }) => {
+        setMetiers(data)
+        cacherMetiers(data)
+      })
+      .catch(() => {
+        chargerMetiersCache().then((cache) => cache.length && setMetiers(cache))
+      })
   }, [])
 
   const ajouterMetier = async (nom) => {

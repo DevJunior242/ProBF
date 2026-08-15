@@ -17,7 +17,9 @@
     "@mui/material": "^9.3.1",
     "@mui/x-charts": "^9.11.1",
     "axios": "^1.19.0",
+    "dexie": "^4.4.5",
     "framer-motion": "^13.0.0",
+    "qrcode": "^1.5.4",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.2"

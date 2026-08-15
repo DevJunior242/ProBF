@@ -45,12 +45,15 @@ import PlumbingIcon from '@mui/icons-material/Plumbing'
 import AcUnitIcon from '@mui/icons-material/AcUnit'
 import BuildIcon from '@mui/icons-material/Build'
 import InboxIcon from '@mui/icons-material/Inbox'
+import WifiOffIcon from '@mui/icons-material/WifiOff'
 import api from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import DevisExpressDialog from '../components/DevisExpressDialog'
 import AjouterMetierDialog from '../components/AjouterMetierDialog'
 import AjouterQuartierDialog from '../components/AjouterQuartierDialog'
 import useMetiers from '../hooks/useMetiers'
+import { db } from '../offline/db'
+import { cacherQuartiers, chargerQuartiersCache } from '../offline/referentiels'
 
 const ICONES_METIER = {
   electricien: ElectricalServicesIcon,
@@ -107,9 +110,56 @@ export default function PostDemandePage() {
   const [demandeExpressId, setDemandeExpressId] = useState(null)
   const [messageExpress, setMessageExpress] = useState(null)
   const [aSupprimer, setASupprimer] = useState(null)
+  const [queuedCount, setQueuedCount] = useState(0)
 
   useEffect(() => {
-    api.get('/quartiers').then(({ data }) => setQuartiers(data))
+    api
+      .get('/quartiers')
+      .then(({ data }) => {
+        setQuartiers(data)
+        cacherQuartiers(data)
+      })
+      .catch(() => {
+        chargerQuartiersCache().then((cache) => cache.length && setQuartiers(cache))
+      })
+  }, [])
+
+  // Recompte les demandes publiées hors-ligne, encore en attente d'envoi.
+  const refreshQueuedCount = async () => {
+    const count = await db.syncQueue.where({ type: 'demande', status: 'pending' }).count()
+    setQueuedCount(count)
+  }
+
+  // Envoie au serveur chaque demande encore en attente, appelé au montage
+  // et à chaque retour de connexion.
+  const flushDemandeQueue = async () => {
+    const pending = await db.syncQueue.where({ type: 'demande', status: 'pending' }).toArray()
+
+    for (const item of pending) {
+      try {
+        await api.post('/demandes', item.payload)
+        await db.syncQueue.delete(item.id)
+      } catch (err) {
+        if (!err.response) {
+          // Toujours hors ligne : inutile d'essayer les suivantes.
+          break
+        }
+        // Le serveur a répondu (ex: vérification pas encore validée entre
+        // temps) : ce n'est pas un problème réseau, on arrête d'insister
+        // sur celle-ci plutôt que de la retenter indéfiniment.
+        await db.syncQueue.update(item.id, { status: 'failed' })
+      }
+    }
+
+    await refreshQueuedCount()
+    if (onglet === 2) chargerMesDemandes()
+  }
+
+  useEffect(() => {
+    flushDemandeQueue()
+    window.addEventListener('online', flushDemandeQueue)
+    return () => window.removeEventListener('online', flushDemandeQueue)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const ajouterQuartier = async ({ ville, nom }) => {
@@ -177,6 +227,26 @@ export default function PostDemandePage() {
       if (err.response?.status === 403) {
         setError(err.response.data?.message)
         setErreurVerification(true)
+      } else if (!err.response && !editingDemandeId) {
+        // Pas de réponse du tout = vraiment hors ligne (pas une erreur 403
+        // ou de validation). Une demande hors-ligne finira quand même
+        // rejetée côté serveur si le compte n'est pas vérifié : autant le
+        // dire tout de suite plutôt que de la mettre en attente pour rien.
+        if (user.verification_statut !== 3) {
+          setError("Tu dois d'abord vérifier ton identité (CNIB) pour publier une demande.")
+          setErreurVerification(true)
+        } else {
+          await db.syncQueue.add({
+            id: crypto.randomUUID(),
+            type: 'demande',
+            status: 'pending',
+            createdAt: Date.now(),
+            payload,
+          })
+          await refreshQueuedCount()
+          setSuccessMessage('Pas de connexion : demande enregistrée, elle sera envoyée dès que tu seras reconnecté.')
+          resetForm()
+        }
       } else {
         setError("Impossible d'envoyer ta demande, vérifie les champs.")
         setErreurVerification(false)
@@ -225,10 +295,20 @@ export default function PostDemandePage() {
         <Avatar sx={{ bgcolor: 'primary.main', width: 52, height: 52 }}>
           <CampaignIcon />
         </Avatar>
-        <Box>
-          <Typography variant="h4" fontWeight={800}>
-            Radar de demande
-          </Typography>
+        <Box sx={{ flexGrow: 1 }}>
+          <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
+            <Typography variant="h4" fontWeight={800}>
+              Radar de demande
+            </Typography>
+            {queuedCount > 0 && (
+              <Chip
+                size="small"
+                color="warning"
+                icon={<WifiOffIcon fontSize="small" />}
+                label={`${queuedCount} en attente d'envoi`}
+              />
+            )}
+          </Stack>
           <Typography color="text.secondary">
             Décris ton besoin, les pros du quartier concerné pourront te contacter.
           </Typography>
