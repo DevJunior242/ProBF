@@ -21,3 +21,16 @@ db.version(1).stores({
   prosQueries: 'id',
   syncQueue: 'id, type, status, createdAt, [type+status]',
 })
+
+// v2 : consultation d'une fiche pro et messagerie hors-ligne.
+// - prosDetail : une fiche pro complète par id (dernière version vue).
+// - conversations : la liste entière sous une seule clé fixe ('liste'),
+//   comme prosQueries — on veut rejouer exactement ce que l'utilisateur a
+//   déjà vu, pas reconstituer une liste à partir de fragments.
+// - messagesParConversation : id = conversationId, une ligne par fil de
+//   discussion déjà ouvert.
+db.version(2).stores({
+  prosDetail: 'id',
+  conversations: 'id',
+  messagesParConversation: 'id',
+})

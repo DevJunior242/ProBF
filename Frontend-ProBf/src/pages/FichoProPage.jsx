@@ -19,9 +19,11 @@ import {
 import VerifiedIcon from '@mui/icons-material/Verified'
 import WhatsAppIcon from '@mui/icons-material/WhatsApp'
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutlineOutlined'
+import WifiOffIcon from '@mui/icons-material/WifiOff'
 import api from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import { brand } from '../theme/getTheme'
+import { cacherProDetail, chargerProDetailCache } from '../offline/pros'
 
 export default function FichoProPage() {
   const { id } = useParams()
@@ -32,12 +34,24 @@ export default function FichoProPage() {
   const [avisNote, setAvisNote] = useState(5)
   const [avisCommentaire, setAvisCommentaire] = useState('')
   const [avisMessage, setAvisMessage] = useState(null)
+  const [horsLigne, setHorsLigne] = useState(false)
 
   const chargerPro = () => {
     setLoading(true)
+    setHorsLigne(false)
     api
       .get(`/pros/${id}`)
-      .then(({ data }) => setPro(data))
+      .then(({ data }) => {
+        setPro(data)
+        cacherProDetail(data)
+      })
+      .catch(async () => {
+        const cache = await chargerProDetailCache(id)
+        if (cache) {
+          setPro(cache)
+          setHorsLigne(true)
+        }
+      })
       .finally(() => setLoading(false))
   }
 
@@ -102,6 +116,11 @@ export default function FichoProPage() {
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
+      {horsLigne && (
+        <Alert severity="warning" icon={<WifiOffIcon fontSize="small" />} sx={{ mb: 3 }}>
+          Pas de connexion : fiche affichée depuis ta dernière consultation.
+        </Alert>
+      )}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ alignItems: { sm: 'center' } }}>
         <Avatar src={pro.profile?.avatar ?? undefined} sx={{ width: 96, height: 96 }}>
           {pro.nom?.[0]}
