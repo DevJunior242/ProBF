@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, Link as RouterLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -111,6 +111,13 @@ export default function PostDemandePage() {
   const [messageExpress, setMessageExpress] = useState(null)
   const [aSupprimer, setASupprimer] = useState(null)
   const [queuedCount, setQueuedCount] = useState(0)
+  // flushDemandeQueue est capturée une seule fois par l'écouteur 'online'
+  // (voir plus bas) : sans ref, elle verrait toujours onglet={0}, sa valeur
+  // au montage, même si l'utilisateur est passé sur "Mes demandes" depuis.
+  const ongletRef = useRef(onglet)
+  useEffect(() => {
+    ongletRef.current = onglet
+  }, [onglet])
 
   useEffect(() => {
     api
@@ -128,6 +135,15 @@ export default function PostDemandePage() {
   const refreshQueuedCount = async () => {
     const count = await db.syncQueue.where({ type: 'demande', status: 'pending' }).count()
     setQueuedCount(count)
+  }
+
+  const chargerMesDemandes = () => {
+    if (!user) return
+    setLoadingMesDemandes(true)
+    api
+      .get('/demandes', { params: { mine: 1 } })
+      .then(({ data }) => setMesDemandes(data.data))
+      .finally(() => setLoadingMesDemandes(false))
   }
 
   // Envoie au serveur chaque demande encore en attente, appelé au montage
@@ -152,7 +168,7 @@ export default function PostDemandePage() {
     }
 
     await refreshQueuedCount()
-    if (onglet === 2) chargerMesDemandes()
+    if (ongletRef.current === 2) chargerMesDemandes()
   }
 
   useEffect(() => {
@@ -180,15 +196,6 @@ export default function PostDemandePage() {
   useEffect(() => {
     if (onglet === 1) chargerDemandes()
   }, [onglet, filtreMetier])
-
-  const chargerMesDemandes = () => {
-    if (!user) return
-    setLoadingMesDemandes(true)
-    api
-      .get('/demandes', { params: { mine: 1 } })
-      .then(({ data }) => setMesDemandes(data.data))
-      .finally(() => setLoadingMesDemandes(false))
-  }
 
   useEffect(() => {
     if (onglet === 2) chargerMesDemandes()
