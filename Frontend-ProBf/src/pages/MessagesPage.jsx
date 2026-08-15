@@ -50,6 +50,8 @@ export default function MessagesPage() {
   const [envoiEnCours, setEnvoiEnCours] = useState(false)
   const [horsLigneListe, setHorsLigneListe] = useState(false)
   const [horsLigneThread, setHorsLigneThread] = useState(false)
+  const [erreurListe, setErreurListe] = useState(null)
+  const [erreurThread, setErreurThread] = useState(null)
   const [enLigne, setEnLigne] = useState(navigator.onLine)
   const bottomRef = useRef(null)
   const fileInputRef = useRef(null)
@@ -75,6 +77,7 @@ export default function MessagesPage() {
 
   const chargerConversations = () => {
     setHorsLigneListe(false)
+    setErreurListe(null)
     api
       .get('/conversations')
       .then(({ data }) => {
@@ -87,6 +90,8 @@ export default function MessagesPage() {
         if (cache) {
           setConversations(cache)
           setHorsLigneListe(true)
+        } else if (!navigator.onLine) {
+          setErreurListe('Pas de connexion, et aucune conversation encore consultée dans ce navigateur.')
         }
         setLoadingListe(false)
       })
@@ -96,6 +101,7 @@ export default function MessagesPage() {
 
   const chargerMessages = (id) => {
     setHorsLigneThread(false)
+    setErreurThread(null)
     api
       .get(`/conversations/${id}/messages`)
       .then(({ data }) => {
@@ -109,6 +115,8 @@ export default function MessagesPage() {
         if (cache) {
           setMessages(cache)
           setHorsLigneThread(true)
+        } else if (!navigator.onLine) {
+          setErreurThread('Pas de connexion, et ce fil n’a pas encore été consulté dans ce navigateur.')
         }
         setLoadingThread(false)
       })
@@ -261,6 +269,10 @@ export default function MessagesPage() {
               <Box sx={{ p: 3, textAlign: 'center' }}>
                 <CircularProgress size={24} />
               </Box>
+            ) : erreurListe ? (
+              <Alert severity="warning" icon={<WifiOffIcon fontSize="small" />} sx={{ m: 2 }}>
+                {erreurListe}
+              </Alert>
             ) : conversations.length === 0 ? (
               <Typography color="text.secondary" sx={{ p: 3 }}>
                 Aucune conversation pour l'instant.
@@ -322,6 +334,10 @@ export default function MessagesPage() {
                     <Box sx={{ textAlign: 'center', mt: 2 }}>
                       <CircularProgress size={24} />
                     </Box>
+                  ) : erreurThread ? (
+                    <Alert severity="warning" icon={<WifiOffIcon fontSize="small" />}>
+                      {erreurThread}
+                    </Alert>
                   ) : (
                     <Stack spacing={1.5}>
                       {messages.map((m) => {

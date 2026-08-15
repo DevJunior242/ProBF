@@ -87,7 +87,11 @@ export default function ProsPage() {
           setTotal(cache.total)
           setHorsLigne(true)
         } else {
-          setError("Impossible de charger les pros pour l'instant.")
+          setError(
+            navigator.onLine
+              ? "Impossible de charger les pros pour l'instant."
+              : 'Pas de connexion, et aucun résultat enregistré pour cette recherche. Connecte-toi une première fois pour pouvoir la consulter hors ligne ensuite.',
+          )
         }
       } finally {
         setLoading(false)

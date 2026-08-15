@@ -35,10 +35,12 @@ export default function FichoProPage() {
   const [avisCommentaire, setAvisCommentaire] = useState('')
   const [avisMessage, setAvisMessage] = useState(null)
   const [horsLigne, setHorsLigne] = useState(false)
+  const [erreur, setErreur] = useState(null)
 
   const chargerPro = () => {
     setLoading(true)
     setHorsLigne(false)
+    setErreur(null)
     api
       .get(`/pros/${id}`)
       .then(({ data }) => {
@@ -50,6 +52,12 @@ export default function FichoProPage() {
         if (cache) {
           setPro(cache)
           setHorsLigne(true)
+        } else {
+          setErreur(
+            navigator.onLine
+              ? "Impossible de charger cette fiche pour l'instant."
+              : 'Pas de connexion, et cette fiche n’a pas encore été consultée. Connecte-toi une première fois pour pouvoir la revoir hors ligne ensuite.',
+          )
         }
       })
       .finally(() => setLoading(false))
@@ -108,7 +116,15 @@ export default function FichoProPage() {
     )
   }
 
-  if (!pro) return null
+  if (!pro) {
+    return (
+      <Container maxWidth="md" sx={{ py: 6 }}>
+        <Alert severity="warning" icon={<WifiOffIcon fontSize="small" />}>
+          {erreur}
+        </Alert>
+      </Container>
+    )
+  }
 
   const dispo = pro.profile?.statut_dispo
   const dispoLabel = dispo === 1 ? 'Disponible' : dispo === 2 ? 'Sur RDV' : null
