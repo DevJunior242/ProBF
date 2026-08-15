@@ -25,7 +25,6 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import VerificationPage from "./pages/VerificationPage";
 import SecuritePage from "./pages/SecuritePage";
-import TestPage from "./pages/TestPage";
 
 function App() {
   return (
@@ -37,7 +36,6 @@ function App() {
           <Route path="/inscription" element={<RegisterPage />} />
         </Route>
         <Route path="/" element={<HomePage />} />
-        <Route path="/test" element={<TestPage />} />
         <Route path="/mot-de-passe-oublie" element={<ForgotPasswordPage />} />
         <Route
           path="/reinitialiser-mot-de-passe"
