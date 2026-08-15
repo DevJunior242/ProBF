@@ -8,8 +8,10 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -67,6 +69,19 @@ class AuthController extends Controller
         if (! $user || ! Hash::check($data['password'], $user->password)) {
             throw ValidationException::withMessages([
                 'identifiant' => ['Identifiants incorrects.'],
+            ]);
+        }
+
+        if ($user->hasEnabledTwoFactor()) {
+            // Pas de token Sanctum tant que le code 2FA n'est pas vérifié :
+            // un jeton temporaire en cache (5 min, à usage unique) fait le
+            // lien avec TwoFactorAuthController::challenge.
+            $challengeToken = Str::random(64);
+            Cache::put("2fa-challenge:{$challengeToken}", $user->id, now()->addMinutes(5));
+
+            return response()->json([
+                'two_factor' => true,
+                'token' => $challengeToken,
             ]);
         }
 

@@ -41,5 +41,9 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('message-send', function ($request) {
             return Limit::perMinute(20)->by($request->user()?->id ?: $request->ip());
         });
+
+        // Un code TOTP n'a que 10^6 combinaisons possibles : limiteur serré
+        // pour rendre le brute-force impraticable dans la fenêtre de 30s.
+        RateLimiter::for('2fa-challenge', fn ($request) => Limit::perMinute(5)->by($request->ip()));
     }
 }

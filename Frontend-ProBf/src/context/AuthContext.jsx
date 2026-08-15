@@ -17,6 +17,19 @@ export function AuthProvider({ children }) {
 
   const login = async (identifiant, password) => {
     const { data } = await api.post('/auth/login', { identifiant, password })
+
+    if (data.two_factor) {
+      // Pas de compte connecté pour l'instant : juste le jeton temporaire
+      // que verifyTwoFactor() devra échanger contre le vrai token.
+      return { twoFactor: true, challengeToken: data.token }
+    }
+
+    persist(data.user, data.token)
+    return { twoFactor: false }
+  }
+
+  const verifyTwoFactor = async (challengeToken, credentials) => {
+    const { data } = await api.post('/auth/2fa/challenge', { token: challengeToken, ...credentials })
     persist(data.user, data.token)
     return data.user
   }
@@ -48,7 +61,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, hasRole, updateUser }}>
+    <AuthContext.Provider value={{ user, login, verifyTwoFactor, register, logout, hasRole, updateUser }}>
       {children}
     </AuthContext.Provider>
   )

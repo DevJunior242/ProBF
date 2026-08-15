@@ -1,29 +1,31 @@
-import { Routes, Route } from 'react-router-dom'
-import Layout from './components/Layout'
-import DashboardLayout from './components/DashboardLayout'
-import ProtectedRoute from './components/ProtectedRoute'
-import GuestRoute from './components/GuestRoute'
-import HomePage from './pages/HomePage'
-import LoginPage from './pages/LoginPage'
-import RegisterPage from './pages/RegisterPage'
-import FichoProPage from './pages/FichoProPage'
-import ProsPage from './pages/ProsPage'
-import FournisseursPage from './pages/FournisseursPage'
-import FicheFournisseurPage from './pages/FicheFournisseurPage'
-import DashboardPage from './pages/DashboardPage'
-import ProfileEditPage from './pages/ProfileEditPage'
-import FournisseurDashboardPage from './pages/FournisseurDashboardPage'
-import PostDemandePage from './pages/PostDemandePage'
-import ParrainagePage from './pages/ParrainagePage'
-import AbonnementPage from './pages/AbonnementPage'
-import MessagesPage from './pages/MessagesPage'
-import AdminPage from './pages/AdminPage'
-import CguPage from './pages/CguPage'
-import ConfidentialitePage from './pages/ConfidentialitePage'
-import ForgotPasswordPage from './pages/ForgotPasswordPage'
-import ResetPasswordPage from './pages/ResetPasswordPage'
-import NotFoundPage from './pages/NotFoundPage'
-import VerificationPage from './pages/VerificationPage'
+import { Routes, Route } from "react-router-dom";
+import Layout from "./components/Layout";
+import DashboardLayout from "./components/DashboardLayout";
+import ProtectedRoute from "./components/ProtectedRoute";
+import GuestRoute from "./components/GuestRoute";
+import HomePage from "./pages/HomePage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import FichoProPage from "./pages/FichoProPage";
+import ProsPage from "./pages/ProsPage";
+import FournisseursPage from "./pages/FournisseursPage";
+import FicheFournisseurPage from "./pages/FicheFournisseurPage";
+import DashboardPage from "./pages/DashboardPage";
+import ProfileEditPage from "./pages/ProfileEditPage";
+import FournisseurDashboardPage from "./pages/FournisseurDashboardPage";
+import PostDemandePage from "./pages/PostDemandePage";
+import ParrainagePage from "./pages/ParrainagePage";
+import AbonnementPage from "./pages/AbonnementPage";
+import MessagesPage from "./pages/MessagesPage";
+import AdminPage from "./pages/AdminPage";
+import CguPage from "./pages/CguPage";
+import ConfidentialitePage from "./pages/ConfidentialitePage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
+import NotFoundPage from "./pages/NotFoundPage";
+import VerificationPage from "./pages/VerificationPage";
+import SecuritePage from "./pages/SecuritePage";
+import TestPage from "./pages/TestPage";
 
 function App() {
   return (
@@ -35,8 +37,12 @@ function App() {
           <Route path="/inscription" element={<RegisterPage />} />
         </Route>
         <Route path="/" element={<HomePage />} />
+        <Route path="/test" element={<TestPage />} />
         <Route path="/mot-de-passe-oublie" element={<ForgotPasswordPage />} />
-        <Route path="/reinitialiser-mot-de-passe" element={<ResetPasswordPage />} />
+        <Route
+          path="/reinitialiser-mot-de-passe"
+          element={<ResetPasswordPage />}
+        />
         <Route path="/pros" element={<ProsPage />} />
         <Route path="/pros/:id" element={<FichoProPage />} />
         <Route path="/fournisseurs" element={<FournisseursPage />} />
@@ -52,18 +58,22 @@ function App() {
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/profil" element={<ProfileEditPage />} />
-          <Route path="/fournisseur/dashboard" element={<FournisseurDashboardPage />} />
+          <Route
+            path="/fournisseur/dashboard"
+            element={<FournisseurDashboardPage />}
+          />
           <Route path="/parrainage" element={<ParrainagePage />} />
           <Route path="/abonnement" element={<AbonnementPage />} />
           <Route path="/messages" element={<MessagesPage />} />
           <Route path="/verification" element={<VerificationPage />} />
+          <Route path="/securite" element={<SecuritePage />} />
           <Route element={<ProtectedRoute role="admin" />}>
             <Route path="/admin" element={<AdminPage />} />
           </Route>
         </Route>
       </Route>
     </Routes>
-  )
+  );
 }
 
-export default App
+export default App;

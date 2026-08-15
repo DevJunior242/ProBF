@@ -28,6 +28,7 @@ import CardGiftcardIcon from '@mui/icons-material/CardGiftcard'
 import PaymentIcon from '@mui/icons-material/Payment'
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
 import BadgeIcon from '@mui/icons-material/Badge'
+import SecurityIcon from '@mui/icons-material/Security'
 import LogoutIcon from '@mui/icons-material/Logout'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
@@ -81,6 +82,7 @@ export default function DashboardLayout() {
     },
     ...(hasRole('pro') || hasRole('fournisseur') ? [{ to: '/abonnement', label: 'Abonnement', icon: PaymentIcon }] : []),
     { to: '/parrainage', label: 'Parrainage', icon: CardGiftcardIcon },
+    { to: '/securite', label: 'Sécurité', icon: SecurityIcon },
     ...(hasRole('admin') ? [{ to: '/admin', label: 'Administration', icon: AdminPanelSettingsIcon }] : []),
   ]
 

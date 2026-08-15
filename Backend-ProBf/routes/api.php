@@ -26,6 +26,7 @@ use App\Http\Controllers\Api\PromoController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\QuartierController;
 use App\Http\Controllers\Api\RetraitController;
+use App\Http\Controllers\Api\TwoFactorAuthController;
 use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\VerificationController;
 use App\Http\Controllers\Api\WhatsappClickController;
@@ -40,10 +41,20 @@ Route::prefix('auth')->group(function () {
     Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('reset-password', [AuthController::class, 'resetPassword']);
 
+    // Étape 2 du login quand la 2FA est active (voir AuthController::login) :
+    // l'utilisateur n'est pas encore authentifié, juste porteur du jeton
+    // temporaire reçu à l'étape 1, donc route publique elle aussi.
+    Route::middleware('throttle:2fa-challenge')->post('2fa/challenge', [TwoFactorAuthController::class, 'challenge']);
+
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('logout', [AuthController::class, 'logout']);
         Route::post('email/resend', [AuthController::class, 'resendVerification']);
         Route::post('roles', [AuthController::class, 'ajouterRole']);
+
+        Route::post('2fa/enable', [TwoFactorAuthController::class, 'enable']);
+        Route::post('2fa/confirm', [TwoFactorAuthController::class, 'confirm']);
+        Route::post('2fa/disable', [TwoFactorAuthController::class, 'disable']);
+        Route::post('2fa/recovery-codes/regenerate', [TwoFactorAuthController::class, 'regenerateRecoveryCodes']);
     });
 });
 

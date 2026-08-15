@@ -21,7 +21,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 #[Fillable(['nom', 'telephone', 'email', 'password', 'cgu_accepted_at', 'cnib_recto', 'cnib_verso', 'verification_statut', 'verification_rejet_raison', 'verifie_par_admin_id', 'verified_at'])]
-#[Hidden(['password', 'remember_token', 'cnib_recto', 'cnib_verso'])]
+#[Hidden(['password', 'remember_token', 'cnib_recto', 'cnib_verso', 'two_factor_secret', 'two_factor_recovery_codes'])]
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
@@ -41,7 +41,23 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
             'verification_statut' => VerificationStatut::class,
             'verified_at' => 'datetime',
+            // Chiffrés au repos (clé APP_KEY) : la valeur en base n'est jamais
+            // lisible telle quelle, mais reste utilisable normalement via
+            // l'attribut ($user->two_factor_secret) grâce au cast.
+            'two_factor_secret' => 'encrypted',
+            'two_factor_recovery_codes' => 'encrypted:array',
+            'two_factor_confirmed_at' => 'datetime',
         ];
+    }
+
+    /**
+     * La 2FA n'est active que si un secret a été confirmé par un code valide
+     * (voir TwoFactorAuthController::confirm) — un secret généré par enable()
+     * mais jamais confirmé ne doit pas bloquer la connexion.
+     */
+    public function hasEnabledTwoFactor(): bool
+    {
+        return $this->two_factor_secret !== null && $this->two_factor_confirmed_at !== null;
     }
 
     public function roles(): BelongsToMany
