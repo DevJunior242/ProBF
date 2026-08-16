@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext'
 import DashboardTrendChart from '../components/DashboardTrendChart'
 import BoostDialog from '../components/BoostDialog'
 import AjouterRoleCard from '../components/AjouterRoleCard'
+import PartagerProfilButton from '../components/PartagerProfilButton'
 
 function StatCard({ label, value }) {
   return (
@@ -24,7 +25,7 @@ function StatCard({ label, value }) {
 }
 
 export default function DashboardPage() {
-  const { hasRole } = useAuth()
+  const { user, hasRole } = useAuth()
   const estPro = hasRole('pro')
   const [stats, setStats] = useState(null)
   const [dispo, setDispo] = useState(1)
@@ -77,6 +78,7 @@ export default function DashboardPage() {
             <Button component={Link} to="/profil" variant="outlined">
               Mon profil
             </Button>
+            <PartagerProfilButton chemin={`/pros/${user.id}`} titre="Mon profil ProBF" />
           </Stack>
         )}
       </Stack>

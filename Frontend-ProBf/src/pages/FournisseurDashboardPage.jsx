@@ -29,6 +29,7 @@ import BoostDialog from '../components/BoostDialog'
 import PromoDialog from '../components/PromoDialog'
 import AjouterMetierDialog from '../components/AjouterMetierDialog'
 import AjouterRoleCard from '../components/AjouterRoleCard'
+import PartagerProfilButton from '../components/PartagerProfilButton'
 
 function StatCard({ label, value }) {
   return (
@@ -159,9 +160,15 @@ export default function FournisseurDashboardPage() {
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
-      <Typography variant="h4" fontWeight={700} gutterBottom>
-        Tableau de bord fournisseur
-      </Typography>
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        sx={{ justifyContent: 'space-between', alignItems: { sm: 'center' }, mb: 1, gap: 2 }}
+      >
+        <Typography variant="h4" fontWeight={700}>
+          Tableau de bord fournisseur
+        </Typography>
+        <PartagerProfilButton chemin={`/fournisseurs/${user.id}`} titre="Ma boutique ProBF" />
+      </Stack>
 
       <Grid container spacing={2} sx={{ mb: 4 }}>
         <Grid size={{ xs: 4 }}>
