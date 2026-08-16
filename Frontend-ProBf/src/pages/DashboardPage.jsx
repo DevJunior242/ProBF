@@ -117,9 +117,16 @@ export default function DashboardPage() {
 
       <DashboardTrendChart params={{ espace: estPro ? 'pro' : 'client' }} />
 
+      {estPro && stats.abonnement_actif?.est_essai && joursAvantExpiration > 7 && (
+        <Alert severity="info" sx={{ mt: 3 }}>
+          Tu es en période d'essai gratuit jusqu'au {new Date(stats.abonnement_actif.date_fin).toLocaleDateString('fr-FR')} — profites-en pour recevoir des demandes avant de choisir un abonnement.
+        </Alert>
+      )}
+
       {estPro && joursAvantExpiration !== null && joursAvantExpiration <= 7 && (
         <Alert severity="warning" sx={{ mt: 3 }}>
-          Ton abonnement expire {joursAvantExpiration <= 0 ? "aujourd'hui" : `dans ${joursAvantExpiration} jour${joursAvantExpiration > 1 ? 's' : ''}`}, pense à le renouveler.
+          {stats.abonnement_actif?.est_essai ? 'Ton essai gratuit se termine' : 'Ton abonnement expire'}{' '}
+          {joursAvantExpiration <= 0 ? "aujourd'hui" : `dans ${joursAvantExpiration} jour${joursAvantExpiration > 1 ? 's' : ''}`}, pense à choisir un abonnement pour rester visible.
         </Alert>
       )}
 
@@ -128,7 +135,7 @@ export default function DashboardPage() {
           <Typography color="text.secondary">
             Abonnement :{' '}
             {stats.abonnement_actif
-              ? `actif jusqu'au ${new Date(stats.abonnement_actif.date_fin).toLocaleDateString('fr-FR')}`
+              ? `${stats.abonnement_actif.est_essai ? 'essai gratuit' : 'actif'} jusqu'au ${new Date(stats.abonnement_actif.date_fin).toLocaleDateString('fr-FR')}`
               : 'aucun abonnement actif'}
           </Typography>
           <Button component={Link} to="/abonnement" variant="outlined" size="small">

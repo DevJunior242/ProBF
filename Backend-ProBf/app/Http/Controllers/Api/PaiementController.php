@@ -125,6 +125,13 @@ class PaiementController extends Controller
             'abonnement_id' => $abonnement->id,
         ]);
 
+        // Un renouvellement ne lève que le masquage automatique pour
+        // non-paiement, jamais un masquage décidé par un admin.
+        $profile = $paiement->user->profile;
+        if ($profile?->masque_motif === 'expiration') {
+            $profile->update(['masque' => false, 'masque_motif' => null]);
+        }
+
         return $paiement->load('abonnement');
     }
 

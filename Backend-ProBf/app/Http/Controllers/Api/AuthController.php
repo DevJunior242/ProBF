@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\RoleNom;
+use App\Enums\TypeAbonnement;
 use App\Http\Controllers\Controller;
+use App\Models\Abonnement;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
@@ -46,6 +48,10 @@ class AuthController extends Controller
 
         $roleIds = Role::whereIn('nom', array_map(fn ($r) => RoleNom::from($r), $nomsRoles))->pluck('id');
         $user->roles()->attach($roleIds);
+
+        foreach ($nomsRoles as $nomRole) {
+            $this->demarrerEssaiSiApplicable($user, RoleNom::from($nomRole));
+        }
 
         event(new Registered($user));
 
@@ -108,7 +114,27 @@ class AuthController extends Controller
         $role = Role::where('nom', $roleNom)->firstOrFail();
         $user->roles()->attach($role);
 
+        $this->demarrerEssaiSiApplicable($user, $roleNom);
+
         return $user->load('roles');
+    }
+
+    /**
+     * Un rôle Pro ou Fournisseur ouvre droit à un essai gratuit (une seule
+     * fois par type, voir Abonnement::demarrerEssai) ; le rôle Client n'a pas
+     * d'abonnement.
+     */
+    private function demarrerEssaiSiApplicable(User $user, RoleNom $role): void
+    {
+        $type = match ($role) {
+            RoleNom::Pro => TypeAbonnement::Pro,
+            RoleNom::Fournisseur => TypeAbonnement::Fournisseur,
+            default => null,
+        };
+
+        if ($type !== null) {
+            Abonnement::demarrerEssai($user, $type, config('probf.jours_essai_abonnement'));
+        }
     }
 
     public function logout(Request $request)

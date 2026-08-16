@@ -121,11 +121,16 @@ export default function AdminAbonnements() {
                       : 'Aucun'}
                   </TableCell>
                   <TableCell>
-                    <Chip
-                      size="small"
-                      label={l.abonnement_actif ? 'Actif' : 'Impayé'}
-                      color={l.abonnement_actif ? 'success' : 'error'}
-                    />
+                    <Stack direction="row" spacing={0.5}>
+                      <Chip
+                        size="small"
+                        label={l.abonnement_actif ? 'Actif' : 'Impayé'}
+                        color={l.abonnement_actif ? 'success' : 'error'}
+                      />
+                      {l.abonnement_actif && l.abonnement?.est_essai && (
+                        <Chip size="small" label="Essai" color="info" variant="outlined" />
+                      )}
+                    </Stack>
                   </TableCell>
                   <TableCell>
                     <Chip

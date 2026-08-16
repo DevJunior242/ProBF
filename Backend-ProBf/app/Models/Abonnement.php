@@ -11,10 +11,33 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['user_id', 'type', 'statut', 'date_debut', 'date_fin', 'montant'])]
+#[Fillable(['user_id', 'type', 'statut', 'date_debut', 'date_fin', 'montant', 'est_essai'])]
 class Abonnement extends Model
 {
     use HasUuids;
+
+    /**
+     * Démarre un essai gratuit à l'ouverture d'un rôle Pro/Fournisseur, une
+     * seule fois par type et par compte : si ce type a déjà eu un abonnement
+     * (essai ou payant, actif ou expiré), on ne redonne pas d'essai.
+     */
+    public static function demarrerEssai(User $user, TypeAbonnement $type, int $days): ?self
+    {
+        $dejaEuUnAbonnement = $user->abonnements()->where('type', $type)->exists();
+
+        if ($dejaEuUnAbonnement) {
+            return null;
+        }
+
+        return $user->abonnements()->create([
+            'type' => $type,
+            'statut' => StatutAbonnement::Actif,
+            'date_debut' => now(),
+            'date_fin' => now()->addDays($days),
+            'montant' => 0,
+            'est_essai' => true,
+        ]);
+    }
 
     /**
      * Active un abonnement pour $days jours, en prolongeant l'abonnement actif
@@ -52,6 +75,7 @@ class Abonnement extends Model
             'date_debut' => 'date',
             'date_fin' => 'date',
             'montant' => 'decimal:2',
+            'est_essai' => 'boolean',
         ];
     }
 

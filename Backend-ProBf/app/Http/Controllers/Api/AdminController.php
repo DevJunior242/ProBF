@@ -285,7 +285,12 @@ class AdminController extends Controller
 
         abort_if(! $profile, 404, "Ce profil n'a pas encore de fiche.");
 
-        $profile->update(['masque' => ! $profile->masque]);
+        $nouveauMasque = ! $profile->masque;
+
+        $profile->update([
+            'masque' => $nouveauMasque,
+            'masque_motif' => $nouveauMasque ? 'admin' : null,
+        ]);
 
         return $profile;
     }

@@ -18,6 +18,7 @@ import {
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone'
 import DoneAllIcon from '@mui/icons-material/DoneAll'
 import DeleteIcon from '@mui/icons-material/Delete'
+import { useNavigate } from 'react-router-dom'
 import api from '../api/client'
 import { useAuth } from '../context/AuthContext'
 
@@ -25,6 +26,7 @@ const POLL_INTERVAL_MS = 20000
 
 export default function NotificationIcon() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [anchorEl, setAnchorEl] = useState(null)
   const [notifications, setNotifications] = useState([])
   const [nonLues, setNonLues] = useState(0)
@@ -66,6 +68,16 @@ export default function NotificationIcon() {
       charger()
     } finally {
       setLoading(false)
+    }
+  }
+
+  const ouvrirLien = async (n) => {
+    if (!n.data.lien) return
+    setAnchorEl(null)
+    navigate(n.data.lien)
+    if (!n.read_at) {
+      await api.patch('/notifications/lues', { ids: [n.id] })
+      charger()
     }
   }
 
@@ -134,8 +146,17 @@ export default function NotificationIcon() {
                     disablePadding
                     sx={{ bgcolor: n.read_at ? 'transparent' : 'action.hover' }}
                   >
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start', width: '100%', px: 1 }}>
-                      <ListItemIcon sx={{ minWidth: 36, mt: 1 }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        width: '100%',
+                        px: 1,
+                        cursor: n.data.lien ? 'pointer' : 'default',
+                      }}
+                      onClick={() => ouvrirLien(n)}
+                    >
+                      <ListItemIcon sx={{ minWidth: 36, mt: 1 }} onClick={(e) => e.stopPropagation()}>
                         <Checkbox
                           size="small"
                           checked={selection.includes(n.id)}
