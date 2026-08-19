@@ -39,4 +39,11 @@ return [
         ],
     ],
 
+    // Clé secrète Turnstile (jamais exposée au frontend, sert à vérifier le
+    // jeton via l'API siteverify) ; la clé publique (site key) va dans
+    // Frontend-ProBf/.env sous VITE_TURNSTILE_SITE_KEY, jamais ici.
+    'turnstile' => [
+        'secret' => env('TURNSTILE_SECRET_KEY'),
+    ],
+
 ];

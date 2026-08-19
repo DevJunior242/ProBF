@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Abonnement;
 use App\Models\Role;
 use App\Models\User;
+use App\Rules\ValidTurnstileToken;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -33,6 +34,7 @@ class AuthController extends Controller
             // rétrocompat : l'ancien champ "role" (singulier) est encore accepté
             'role' => ['nullable', Rule::in($rolesAutorises)],
             'cgu_accepted' => ['required', 'accepted'],
+            'turnstile_token' => [new ValidTurnstileToken],
         ]);
 
         $user = User::create([

@@ -21,6 +21,7 @@ import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import { useAuth } from "../context/AuthContext";
 import PasswordField from "../components/PasswordField";
 import Logo from "../components/Logo";
+import TurnstileWidget from "../components/TurnstileWidget";
 import api from "../api/client";
 
 export default function RegisterPage() {
@@ -35,6 +36,7 @@ export default function RegisterPage() {
     password: "",
     password_confirmation: "",
     roles: ["client"],
+    turnstile_token: "",
   });
   const [cguAccepted, setCguAccepted] = useState(false);
   const [error, setError] = useState(null);
@@ -211,6 +213,10 @@ export default function RegisterPage() {
                   <Link component={RouterLink} to="/confidentialite">politique de confidentialité</Link>
                 </Typography>
               }
+            />
+
+            <TurnstileWidget
+              onVerify={(token) => setForm({ ...form, turnstile_token: token })}
             />
 
             <Button
